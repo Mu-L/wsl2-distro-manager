@@ -83,6 +83,17 @@ class AiChatSessions extends ChangeNotifier {
   /// this drop out rather than growing prefs without a bound.
   static const int maxSessions = 20;
 
+  /// The clock the ids and timestamps are taken from, so a test can hold it
+  /// still and file two chats inside one tick.
+  @visibleForTesting
+  static DateTime Function() now = DateTime.now;
+
+  /// Distinguishes chats filed inside the same clock tick. `DateTime.now()`
+  /// resolves to about 15ms on Windows, so two archives in quick succession
+  /// can share a microsecondsSinceEpoch — and an id collision means the
+  /// second chat replaces the first instead of joining it.
+  static int _idSequence = 0;
+
   /// The blob [_decoded] was parsed from, so a repaint that changed nothing
   /// does not decode it again. The panel's header asks whether there is any
   /// history on every build — which, while a reply streams in, is every
@@ -162,7 +173,8 @@ class AiChatSessions extends ChangeNotifier {
   /// Puts [live] at the top of [all] under the current id, replacing the
   /// entry it was opened from, and trims the tail past [maxSessions].
   void _fileInto(List<AiChatSession> all, List<AiMessage> live) {
-    final id = currentId ?? DateTime.now().microsecondsSinceEpoch.toString();
+    final id = currentId ??
+        '${now().microsecondsSinceEpoch}-${_idSequence++}';
     all
       ..removeWhere((session) => session.id == id)
       ..insert(
@@ -170,7 +182,7 @@ class AiChatSessions extends ChangeNotifier {
         AiChatSession(
           id: id,
           messages: List.of(live),
-          updatedAt: DateTime.now(),
+          updatedAt: now(),
         ),
       );
     if (all.length > maxSessions) all.removeRange(maxSessions, all.length);

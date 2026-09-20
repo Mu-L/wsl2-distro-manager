@@ -62,6 +62,22 @@ void main() {
       expect(all.last.title, 'chat 3');
     });
 
+    test('a frozen clock still files each chat separately', () {
+      // Windows resolves DateTime.now() to about 15ms, so a run of archives
+      // can share a microsecondsSinceEpoch. Holding the clock still is the
+      // worst case of that: every id would collide, and each chat would
+      // replace the one before it.
+      AiChatSessions.now = () => DateTime.utc(2026, 9, 20, 12);
+      addTearDown(() => AiChatSessions.now = DateTime.now);
+
+      sessions.archive([_user('one')]);
+      sessions.archive([_user('two')]);
+      sessions.archive([_user('three')]);
+
+      expect(sessions.list().map((s) => s.title), ['three', 'two', 'one']);
+      expect(sessions.list().map((s) => s.id).toSet(), hasLength(3));
+    });
+
     test('notifies so the panel repaints', () {
       var notifications = 0;
       void listener() => notifications++;
