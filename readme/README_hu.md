@@ -269,11 +269,10 @@ Ez az alkalmazás elérhető a [Microsoft Store](https://apps.microsoft.com/stor
 <summary>macOS Homebrew-val</summary>
 
 ```sh
-brew tap bostrot/tap
 brew install --cask wsl-manager
 ```
 
-Apple Silicon, macOS 11 vagy újabb. A cask a [bostrot/homebrew-tap](https://github.com/bostrot/homebrew-tap) tárolóban él; a `brew upgrade --cask wsl-manager` hozza az új kiadásokat.
+Apple Silicon, macOS 11 vagy újabb. A cask magában a Homebrew-ban található, így nincs szükség tapre; a `brew upgrade --cask wsl-manager` hozza az új kiadásokat.
 </details>
 
 <details>

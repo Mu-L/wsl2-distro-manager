@@ -265,11 +265,10 @@ macOS でも同じです。パネルに表示される QR コードをスマー�
 <summary>macOS（Homebrew）</summary>
 
 ```sh
-brew tap bostrot/tap
 brew install --cask wsl-manager
 ```
 
-Apple シリコン、macOS 11 以降。cask は [bostrot/homebrew-tap](https://github.com/bostrot/homebrew-tap) にあります。`brew upgrade --cask wsl-manager` で新しいリリースを取得できます。
+Apple シリコン、macOS 11 以降。cask は Homebrew 本体に含まれているため、tap は不要です。`brew upgrade --cask wsl-manager` で新しいリリースを取得できます。
 </details>
 
 <details>

@@ -243,11 +243,10 @@ claude mcp add wsl-manager -- npx -y mcp-remote http://127.0.0.1:59133/mcp \
 <summary>macOS 通过 Homebrew 安装</summary>
 
 ```sh
-brew tap bostrot/tap
 brew install --cask wsl-manager
 ```
 
-Apple Silicon，macOS 11 或更高版本。该 cask 位于 [bostrot/homebrew-tap](https://github.com/bostrot/homebrew-tap)；`brew upgrade --cask wsl-manager` 会获取新版本。
+Apple Silicon，macOS 11 或更高版本。该 cask 已随 Homebrew 本体提供，无需添加 tap；`brew upgrade --cask wsl-manager` 会获取新版本。
 </details>
 
 <details>

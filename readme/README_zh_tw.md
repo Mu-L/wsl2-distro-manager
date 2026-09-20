@@ -245,11 +245,10 @@ code 會隨之切換）。一旦發布，權杖就是保護這個能執行指令
 <summary>macOS 透過 Homebrew 安裝</summary>
 
 ```sh
-brew tap bostrot/tap
 brew install --cask wsl-manager
 ```
 
-Apple Silicon，macOS 11 或更新版本。該 cask 位於 [bostrot/homebrew-tap](https://github.com/bostrot/homebrew-tap)；`brew upgrade --cask wsl-manager` 會取得新版本。
+Apple Silicon，macOS 11 或更新版本。該 cask 已隨 Homebrew 本體提供，不需要額外新增 tap；`brew upgrade --cask wsl-manager` 會取得新版本。
 </details>
 
 <details>

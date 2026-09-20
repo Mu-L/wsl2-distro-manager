@@ -267,11 +267,10 @@ Bu uygulama [Microsoft Store](https://apps.microsoft.com/store/detail/wsl-manage
 <summary>Homebrew ile macOS</summary>
 
 ```sh
-brew tap bostrot/tap
 brew install --cask wsl-manager
 ```
 
-Apple Silicon, macOS 11 veya üzeri. Cask [bostrot/homebrew-tap](https://github.com/bostrot/homebrew-tap) deposunda bulunur; `brew upgrade --cask wsl-manager` yeni sürümleri getirir.
+Apple Silicon, macOS 11 veya üzeri. Cask artık Homebrew'ün kendisiyle geliyor, ayrı bir tap gerekmez; `brew upgrade --cask wsl-manager` yeni sürümleri getirir.
 </details>
 
 <details>

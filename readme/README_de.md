@@ -276,11 +276,10 @@ Diese App ist im [Microsoft Store](https://apps.microsoft.com/store/detail/wsl-m
 <summary>macOS über Homebrew</summary>
 
 ```sh
-brew tap bostrot/tap
 brew install --cask wsl-manager
 ```
 
-Apple Silicon, macOS 11 oder neuer. Das Cask liegt in [bostrot/homebrew-tap](https://github.com/bostrot/homebrew-tap); `brew upgrade --cask wsl-manager` holt neue Versionen.
+Apple Silicon, macOS 11 oder neuer. Das Cask ist in Homebrew selbst enthalten, ein Tap ist also nicht nötig; `brew upgrade --cask wsl-manager` holt neue Versionen.
 </details>
 
 <details>
