@@ -117,6 +117,9 @@ void main() {
     messages = [];
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
+    // The first-start AI question is answered with a yes here: these tests
+    // are about what happens once the features are on (bostrot/ai-tasks#98).
+    AiService.setFeaturesEnabled(true);
     workspaceRuntimeBuilder = WslWorkspaceRuntime.new;
     shell = _ScriptedShell();
     workspace = AiWorkspaceService(broker: ExecutionBroker(shell: shell));

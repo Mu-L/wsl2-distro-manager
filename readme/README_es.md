@@ -160,7 +160,7 @@ Ollama, LM Studio, …). Introduce la URL base, la clave y el modelo. El botón
 proveedor, y **Probar conexión** demuestra que las credenciales funcionan antes
 de abrir el chat.
 
-**¿No quieres nada de esto?** **Ajustes → Bring Your Own AI Key → Funciones de IA** desactiva el asistente, el diagnóstico de errores y el AI Workspace: no se muestra nada relacionado con la IA y no se prepara ningún entorno de trabajo por ti. En Pro está activado por defecto.
+**¿No quieres nada de esto?** **Ajustes → Bring Your Own AI Key → Funciones de IA** desactiva el asistente, el diagnóstico de errores y el AI Workspace: no se muestra nada relacionado con la IA y no se prepara ningún entorno de trabajo por ti. Está desactivado hasta que respondas: WSL Manager lo pregunta una vez, en el primer inicio tras instalar o actualizar, y antes de eso no se ejecuta nada relacionado con la IA.
 
 **Sandboxes** (AI Workspace → *Añadir distro sandbox*) crean una instancia
 desechable a partir de cualquier imagen del catálogo (el Ubuntu más reciente por

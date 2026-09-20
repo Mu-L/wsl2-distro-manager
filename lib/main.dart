@@ -186,8 +186,9 @@ void main() async {
   // screen opens rather than probed at startup.
   final aiWorkspaceConfigService =
       AiWorkspaceConfigService(workspace: aiWorkspaceService);
-  // A user who turned AI off in Settings gets no distro set up for them
-  // either — the silent first-launch install is what the switch is for.
+  // Nothing is set up for a user who has not asked for it: the switch is
+  // off until the first-start question is answered with a yes, which is
+  // what the silent first-launch install cost us (bostrot/ai-tasks#98).
   if (AiService.featuresEnabled &&
       LicenseManager().isPro &&
       vmBackend().features.aiWorkspace &&

@@ -44,10 +44,13 @@ class _HangingAdapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
-/// The "AI features" switch (bostrot/ai-tasks#85): a Pro user who does not
-/// want an assistant turns it off in Settings, and every AI entry point —
-/// the chat, the sandbox chat, the diagnosis button, the nav pane entry —
-/// goes with it. On by default: it is an opt-out, not a setup step.
+/// The "AI features" switch (bostrot/ai-tasks#85): a user who does not want
+/// an assistant leaves it off, and every AI entry point — the chat, the
+/// sandbox chat, the diagnosis button, the nav pane entry — goes with it.
+///
+/// Off until the first-start question is answered (bostrot/ai-tasks#98), so
+/// an install that has never been asked behaves exactly like one that said
+/// no. The question itself lives in ai_consent_prompt_test.dart.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -73,10 +76,19 @@ void main() {
   });
 
   group('the switch', () {
-    test('is on until the user turns it off', () {
-      expect(AiService.featuresEnabled, isTrue);
+    test('is off until the user says yes', () {
+      expect(AiService.featuresEnabled, isFalse);
+      expect(AiService.featuresDecided, isFalse);
       expect(prefs.getBool(AiService.enabledPrefKey), isNull,
           reason: 'nothing is written until the user decides');
+    });
+
+    test('a "no" is written even though it matches the undecided value', () {
+      // Otherwise the prompt has nothing to read and comes back on the next
+      // start, which is exactly what "asked once" rules out.
+      AiService.setFeaturesEnabled(false);
+      expect(prefs.getBool(AiService.enabledPrefKey), isFalse);
+      expect(AiService.featuresDecided, isTrue);
     });
 
     test('persists and comes back', () {
@@ -85,9 +97,11 @@ void main() {
       expect(AiService.featuresEnabled, isFalse);
       AiService.setFeaturesEnabled(true);
       expect(AiService.featuresEnabled, isTrue);
+      expect(AiService.featuresDecided, isTrue);
     });
 
     test('closes an open chat dock and tells the shell', () {
+      AiService.setFeaturesEnabled(true);
       var fired = 0;
       void listener() => fired++;
       AiService.featuresChanged.addListener(listener);
@@ -111,6 +125,7 @@ void main() {
     test('turning it off stops a run that is still executing', () async {
       // The dock and its Stop button go with the switch; a run left going
       // would keep calling tools and billing the key with nothing to halt it.
+      AiService.setFeaturesEnabled(true);
       final ai = AiService();
       ai.dioForTesting.httpClientAdapter = _HangingAdapter();
       final run = ai.sendMessage('hello');

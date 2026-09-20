@@ -200,6 +200,9 @@ void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
+    // The first-start AI question is answered with a yes here: these tests
+    // are about what happens once the features are on (bostrot/ai-tasks#98).
+    AiService.setFeaturesEnabled(true);
     backend = _FakeBackend();
     mockServer = MockHttpServer();
     capturedHandler = null;

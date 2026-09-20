@@ -159,7 +159,7 @@ Studio, …). Temel URL'yi, anahtarı ve modeli girin. **Model listesini yükle*
 düğmesi otomatik tamamlamayı sağlayıcının `/models` ucundan doldurur, **Bağlantıyı
 test et** ise sohbeti açmadan önce kimlik bilgilerinin çalıştığını kanıtlar.
 
-**Hiçbirini istemiyor musunuz?** **Ayarlar → Bring Your Own AI Key → Yapay zekâ özellikleri** asistanı, hata tanılamayı ve AI Workspace'i kapatır — yapay zekâyla ilgili hiçbir şey gösterilmez ve sizin için çalışma alanı ortamı kurulmaz. Pro'da varsayılan olarak açıktır.
+**Hiçbirini istemiyor musunuz?** **Ayarlar → Bring Your Own AI Key → Yapay zekâ özellikleri** asistanı, hata tanılamayı ve AI Workspace'i kapatır — yapay zekâyla ilgili hiçbir şey gösterilmez ve sizin için çalışma alanı ortamı kurulmaz. Siz yanıtlayana kadar kapalıdır: WSL Manager bunu bir kez sorar, kurulum veya güncelleme sonrası ilk açılışta, ve o ana kadar yapay zekâyla ilgili hiçbir şey çalışmaz.
 
 **Kum havuzları** (AI Workspace → *Kum havuzu dağıtımı ekle*) herhangi bir katalog
 imajından (varsayılan olarak en yeni Ubuntu) tek kullanımlık bir örnek oluşturur —

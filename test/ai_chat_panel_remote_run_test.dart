@@ -82,6 +82,9 @@ void main() {
     vmBackendBuilder = () => WSLApi(shell: MockShell());
     SharedPreferences.setMockInitialValues({'ByokApiKey': 'sk-test'});
     prefs = await SharedPreferences.getInstance();
+    // The first-start AI question is answered with a yes here: these tests
+    // are about what happens once the features are on (bostrot/ai-tasks#98).
+    AiService.setFeaturesEnabled(true);
     LicenseManager.storeInstallCheckOverride = () => true;
     LicenseManager.storeFreeFromOverride =
         DateTime.now().toUtc().add(const Duration(days: 1));

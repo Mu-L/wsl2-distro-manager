@@ -87,11 +87,23 @@ class AiService {
   /// bought the app for something else had an "AI assistant install without
   /// confirmation" (Store review, bostrot/ai-tasks#85). Off, nothing AI is
   /// shown, nothing is provisioned, and every AI entry point refuses with
-  /// `ai-disabled`. On by default: the switch is an opt-out, not a setup
-  /// step, so a Pro user who wants the assistant still gets it at once.
+  /// `ai-disabled`.
+  ///
+  /// The switch started as an opt-out, on until turned off, and the reviews
+  /// kept coming: "started installing AI stuff that had nothing to do with
+  /// WSL management" (bostrot/ai-tasks#98). So it is an opt-in now — absent
+  /// means *undecided*, which reads as off, and the app asks once on a start
+  /// ([maybeAskAiConsent]). Whichever way that question is answered, the
+  /// answer is written here and it is never asked again; Settings → Bring
+  /// Your Own AI Key carries the same switch for changing one's mind.
   static const String enabledPrefKey = 'AiFeaturesEnabled';
 
-  static bool get featuresEnabled => prefs.getBool(enabledPrefKey) ?? true;
+  static bool get featuresEnabled => prefs.getBool(enabledPrefKey) ?? false;
+
+  /// Whether the user has answered the question yet. The prompt is the only
+  /// caller: everything else wants [featuresEnabled], for which undecided
+  /// and "no" are the same thing.
+  static bool get featuresDecided => prefs.getBool(enabledPrefKey) != null;
 
   /// Fires whenever [setFeaturesEnabled] flips the switch, so the shell can
   /// drop the nav pane entry and the chat dock right away instead of on the
@@ -102,7 +114,10 @@ class AiService {
   static final _AiFeaturesNotifier _featuresNotifier = _AiFeaturesNotifier();
 
   static void setFeaturesEnabled(bool value) {
-    if (value == featuresEnabled) return;
+    // The decision is written even when it matches the effective value: an
+    // undecided install already reads as off, and a "no thanks" that wrote
+    // nothing would have the prompt come back on the next start.
+    if (featuresDecided && value == featuresEnabled) return;
     prefs.setBool(enabledPrefKey, value);
     if (!value) {
       // Off means off now, not after the current run: the dock and its Stop

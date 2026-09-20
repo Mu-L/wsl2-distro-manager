@@ -11,6 +11,7 @@ import 'package:wsl2distromanager/components/constants.dart';
 import 'package:wsl2distromanager/api/vm/vm_platform.dart';
 import 'package:wsl2distromanager/components/helpers.dart';
 import 'package:wsl2distromanager/components/notify.dart';
+import 'package:wsl2distromanager/dialogs/ai_consent_dialog.dart';
 import 'package:wsl2distromanager/dialogs/changelog_dialog.dart';
 import 'package:wsl2distromanager/dialogs/firststart_dialog.dart';
 import 'package:wsl2distromanager/dialogs/rating_dialog.dart';
@@ -43,13 +44,17 @@ initRoot(NotifyMessage statusMsg) async {
         brightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light;
   }
 
+  // Whichever of the welcome and the release notes this start raises, while
+  // it is up, so the AI question can wait for it instead of covering it.
+  Future<void>? greeting;
+
   if (version == null) {
     // First start
     await prefs.setString('version', currentVersion);
     while (GlobalVariable.infobox.currentContext == null) {
       await Future.delayed(const Duration(milliseconds: 100));
     }
-    firststartDialog();
+    greeting = firststartDialog();
   } else if (version != currentVersion) {
     // First start with this version
     await prefs.setString('version', currentVersion);
@@ -63,16 +68,35 @@ initRoot(NotifyMessage statusMsg) async {
         String tagName = latest['tag_name'];
         String body = latest['body'];
 
-        changelogDialog(prefs, tagName, body);
+        greeting = changelogDialog(prefs, tagName, body);
       }
 
       await prefs.setString('LastChangelogVersion', currentVersion);
     }
   }
 
-  // Asked on a later start rather than right after a creation, so the
-  // prompt never lands on top of the dialog the user just closed.
-  unawaited(maybeShowRatingPrompt());
+  // The prompts a start can raise, one after another rather than on top of
+  // each other: the release that introduces the AI question is the one where
+  // every existing install answers it, and a Store user with a few instances
+  // behind them is due the rating prompt on the same start.
+  Future<void> startupPrompts() async {
+    // Whether this install wants anything AI at all, asked once and never
+    // again (bostrot/ai-tasks#98), and behind the greeting that a first run
+    // or an upgrade puts up first.
+    await maybeAskAiConsent(after: greeting);
+    // And again for the rating prompt: an install that answered the AI
+    // question long ago skips straight past the line above, so on an upgrade
+    // it would otherwise land on the release notes. `await` on a null future
+    // is a no-op, which is the ordinary start.
+    await greeting;
+    // Asked on a later start rather than right after a creation, so the
+    // prompt never lands on top of the dialog the user just closed.
+    await maybeShowRatingPrompt();
+  }
+
+  // Not awaited: a user who leaves a prompt open still gets the update check
+  // and the message of the day.
+  unawaited(startupPrompts());
 
   // Check for interrupted move operation
   String? moveOpDistro = prefs.getString('MoveOp_Distro');

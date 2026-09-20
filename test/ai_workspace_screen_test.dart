@@ -81,6 +81,9 @@ void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     prefs = await SharedPreferences.getInstance();
+    // The first-start AI question is answered with a yes here: these tests
+    // are about what happens once the features are on (bostrot/ai-tasks#98).
+    AiService.setFeaturesEnabled(true);
     // Pin the WSL runtime so the service drives the injected test shell; on
     // a macOS dev host the default is the Apple runtime, which would poll a
     // real vmctl and hang.
