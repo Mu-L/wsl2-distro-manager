@@ -9,6 +9,7 @@ import 'package:wsl2distromanager/api/docker_images.dart';
 import 'package:wsl2distromanager/components/analytics.dart';
 import 'package:wsl2distromanager/api/wsl.dart';
 import 'package:wsl2distromanager/api/wsl_errors.dart';
+import 'package:wsl2distromanager/api/docker_local_image.dart';
 import 'package:wsl2distromanager/api/app.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:file_picker/file_picker.dart';
@@ -291,11 +292,9 @@ Future<bool> createInstance(
       }
 
       try {
-        await docker.getRootfsFromLocalImage(name, localImagePath,
+        distroName = await DockerLocalImages().import(name, localImagePath,
+            onStatus: (msg) => Notify.message(msg),
             progress: layerProgress);
-        distroName = docker.filename(
-            localImagePath.split(':')[0],
-            localImagePath.contains(':') ? localImagePath.split(':')[1] : null);
       } on CancelledException {
         return _cancelCreate(onError);
       } catch (e) {
@@ -641,11 +640,7 @@ class _CreateWidgetState extends State<CreateWidget> {
           (e) => Notify.message(e));
       return all.where((x) => !repo.containsKey(x)).toList();
     } else if (sourceType == CreateSourceType.dockerLocalImage) {
-      try {
-        return await DockerImage.listLocalImages();
-      } catch (_) {
-        return <String>[];
-      }
+      return DockerLocalImages().list();
     }
     return <String>[];
   }
