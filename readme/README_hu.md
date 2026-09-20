@@ -95,6 +95,7 @@
 - [x] Nyisd meg a Windows Terminált, a VS Code-ot vagy az Intézőt közvetlenül egy disztribúción belül
 - [x] Kezeld a WSL-t egy *másik* Windows gépen SSH-n keresztül
 - [x] Szinkronizálj egy disztribúciót a hálózatod két gépe között
+- [x] Érd el a példányokat a nevükkel: a hosztnevük a hosts fájlban marad naprakész, így az `ssh ubuntu.wsl` újraindítás után is működik
 - [x] Naprakészen tartja magát: a weboldalról és a GitHubról származó változatok maguk töltik le és telepítik az új kiadásokat (a Store-ból telepítetteket a Store frissíti)
 - [x] Sötét és világos téma, kilenc nyelven elérhető
 

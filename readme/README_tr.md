@@ -95,6 +95,7 @@
 - [x] Windows Terminal'i, VS Code'u veya Dosya Gezgini'ni doğrudan bir dağıtımın içinde açın
 - [x] *Başka* bir Windows makinesindeki WSL'i SSH üzerinden yönetin
 - [x] Ağınızdaki iki makine arasında bir dağıtımı eşitleyin
+- [x] Bir örneğe adıyla erişin: ana makine adı hosts dosyasında güncel tutulur, böylece `ssh ubuntu.wsl` yeniden başlatmadan sonra da çalışır
 - [x] Kendini güncel tutar: web sitesi ve GitHub sürümleri yeni sürümleri kendisi indirip kurar (Store kurulumlarını Store günceller)
 - [x] Koyu ve açık temalar, dokuz dilde kullanılabilir
 

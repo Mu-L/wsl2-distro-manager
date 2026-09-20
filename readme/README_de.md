@@ -96,6 +96,7 @@
 - [x] Windows Terminal, VS Code oder den Explorer direkt in einer Distribution öffnen
 - [x] WSL auf einem *anderen* Windows-Rechner per SSH verwalten
 - [x] Eine Distribution zwischen zwei Rechnern im Netzwerk abgleichen
+- [x] Instanzen über ihren Namen erreichen: der Hostname wird in der hosts-Datei gepflegt, `ssh ubuntu.wsl` funktioniert also auch nach einem Neustart
 - [x] Hält sich selbst aktuell: die Website- und GitHub-Builds laden neue Versionen selbst herunter und installieren sie (Store-Installationen werden vom Store aktualisiert)
 - [x] Dunkles und helles Design, verfügbar in neun Sprachen
 

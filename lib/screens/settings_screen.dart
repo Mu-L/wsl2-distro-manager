@@ -34,6 +34,7 @@ import 'package:wsl2distromanager/api/wslconfig.dart';
 import 'package:wsl2distromanager/components/constants.dart';
 import 'package:wsl2distromanager/components/debounced_text_box.dart';
 import 'package:wsl2distromanager/components/experimental_features_section.dart';
+import 'package:wsl2distromanager/components/hosts_settings_section.dart';
 import 'package:wsl2distromanager/components/helpers.dart';
 import 'package:wsl2distromanager/components/named_button.dart';
 import 'package:wsl2distromanager/components/notify.dart';
@@ -802,6 +803,15 @@ class SettingsPageState extends State<SettingsPage> {
         Expander(
           header: _betaHeader('web-dashboard-settings-text'.i18n()),
           content: _buildWebDashboardSettings(context),
+        ),
+        // Outside the WSL-only block below: a Mac's VMs get their names in
+        // /etc/hosts the same way a distro gets them into
+        // drivers\etc\hosts (bostrot/wsl2-distro-manager#214).
+        const SizedBox(height: 10),
+        Expander(
+          key: const ValueKey('test-hosts-file-expander'),
+          header: Text('hostsfile-text'.i18n()),
+          content: const HostsSettingsSection(),
         ),
         if (!isAppleHost || _useRemoteWsl) ...[
         const SizedBox(height: 10),

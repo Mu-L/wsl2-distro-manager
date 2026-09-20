@@ -95,6 +95,7 @@
 - [x] Abre Windows Terminal, VS Code o el Explorador directamente dentro de una distro
 - [x] Gestiona WSL en *otra* máquina Windows por SSH
 - [x] Sincroniza una distro entre dos máquinas de tu red
+- [x] Alcanza una instancia por su nombre: su nombre de host se mantiene en el archivo hosts, así que `ssh ubuntu.wsl` sigue funcionando tras reiniciar
 - [x] Se mantiene al día: las versiones de la web y de GitHub descargan e instalan las novedades por su cuenta (las instalaciones de la Store las actualiza la Store)
 - [x] Temas oscuro y claro, disponible en nueve idiomas
 

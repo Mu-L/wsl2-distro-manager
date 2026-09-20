@@ -15,6 +15,7 @@ import 'package:wsl2distromanager/api/ai_workspace/shared_settings.dart';
 import 'package:wsl2distromanager/api/ai_workspace/service.dart';
 import 'package:wsl2distromanager/api/app_window.dart';
 import 'package:wsl2distromanager/api/execution/broker.dart';
+import 'package:wsl2distromanager/api/hosts_file_service.dart';
 import 'package:wsl2distromanager/api/license_manager.dart';
 import 'package:wsl2distromanager/api/mcp/wsl_mcp_service.dart';
 import 'package:wsl2distromanager/api/web/web_dashboard_service.dart';
@@ -160,6 +161,12 @@ void main() async {
       await webDashboard.start();
     } catch (_) {}
   }
+
+  // Names for the running instances in the host's hosts file, for whoever
+  // turned that on. The block is only rewritten when an address actually
+  // changes, so a tick that finds nothing new never raises an elevation
+  // prompt (bostrot/wsl2-distro-manager#214).
+  HostsFileService.instance.startAutoSync();
 
   // Probe AI Workspace in the background so the screen has results by the
   // time it opens. Not awaited; the screen joins this same memoized run.
