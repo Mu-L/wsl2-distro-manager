@@ -48,6 +48,7 @@
 **Gestionar distros**
 - [x] Instala desde un catálogo integrado o trae tu propio rootfs
 - [x] Copia, renombra, mueve a otra unidad, respalda y elimina instancias
+- [x] Guarda todas las instancias en una carpeta —con una lista de lo que contiene— y restáuralas en otro PC
 - [x] Compacta los discos virtuales para recuperar el espacio que WSL nunca devuelve
 - [x] Admite Ubuntu, Debian, Alpine, Kali Linux, openSUSE, SLES y cualquier otra cosa que WSL acepte
 

@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart' show mapEquals;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:provider/provider.dart';
 import 'package:wsl2distromanager/components/analytics.dart';
+import 'package:wsl2distromanager/components/backup_settings_section.dart';
 import 'package:wsl2distromanager/components/beta_badge.dart';
 import 'package:wsl2distromanager/api/ai_service.dart';
 import 'package:wsl2distromanager/api/ai_workspace/config_service.dart';
@@ -750,6 +751,25 @@ class SettingsPageState extends State<SettingsPage> {
         Expander(
           header: Text('update-settings-text'.i18n()),
           content: _buildUpdateSettings(context),
+        ),
+        // Above the per-backend sections and outside the WSL-only block:
+        // writing every instance to a folder is the same job on a Mac's VMs
+        // as on WSL, and it is maintenance of the whole install rather than
+        // configuration of one part of it (bostrot/ai-tasks#89).
+        const SizedBox(height: 10),
+        Expander(
+          key: const ValueKey('test-backup-expander'),
+          header: Text('backupandrestore-text'.i18n()),
+          // The flag is read here rather than inside the section so that
+          // turning remote WSL on or off in General settings reaches it: a
+          // `const` child is the same widget instance on every rebuild, and
+          // an element handed an identical widget never builds again.
+          //
+          // [remoteWslActive], not `vmBackend().isRemote`: they are the same
+          // answer on every host, and this one does not build a backend in a
+          // build method — the first `WSLApi()` fires off a distro-link
+          // fetch from its constructor.
+          content: BackupSettingsSection(isRemote: remoteWslActive),
         ),
         if (!isAppleHost || _useRemoteWsl) ...[
         const SizedBox(height: 10),

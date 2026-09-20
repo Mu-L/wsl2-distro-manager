@@ -48,6 +48,7 @@
 **Disztribúciók kezelése**
 - [x] Telepítés beépített katalógusból, vagy hozd a saját rootfs-edet
 - [x] Példányok másolása, átnevezése, másik meghajtóra helyezése, mentése és törlése
+- [x] Minden példány mentése egy mappába – a tartalom listájával együtt –, majd visszaállítás egy másik gépen
 - [x] Virtuális lemezek tömörítése, hogy visszakapd a helyet, amit a WSL sosem ad vissza
 - [x] Támogatja az Ubuntut, Debiant, Alpine-t, Kali Linuxot, openSUSE-t, SLES-t és mindent, amit a WSL elfogad
 

@@ -47,6 +47,7 @@
 **Manage distros**
 - [x] Install from a built-in catalogue, or bring your own rootfs
 - [x] Copy, rename, move to another drive, back up and delete instances
+- [x] Back every instance up to one folder — with a list of what is in it — and restore them all on another PC
 - [x] Compact virtual disks to reclaim space WSL never gives back
 - [x] Supports Ubuntu, Debian, Alpine, Kali Linux, openSUSE, SLES and anything else WSL accepts
 

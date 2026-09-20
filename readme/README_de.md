@@ -49,6 +49,7 @@
 **Distributionen verwalten**
 - [x] Installation aus einem eingebauten Katalog oder mit Ihrem eigenen rootfs
 - [x] Instanzen kopieren, umbenennen, auf ein anderes Laufwerk verschieben, sichern und löschen
+- [x] Alle Instanzen in einen Ordner sichern – samt Liste, was darin liegt – und auf einem anderen PC wiederherstellen
 - [x] Virtuelle Datenträger komprimieren und Platz zurückholen, den WSL nie wieder freigibt
 - [x] Unterstützt Ubuntu, Debian, Alpine, Kali Linux, openSUSE, SLES und alles andere, was WSL akzeptiert
 

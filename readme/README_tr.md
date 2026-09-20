@@ -48,6 +48,7 @@
 **Dağıtımları yönetin**
 - [x] Yerleşik katalogdan kurun ya da kendi rootfs'inizi getirin
 - [x] Örnekleri kopyalayın, yeniden adlandırın, başka bir sürücüye taşıyın, yedekleyin ve silin
+- [x] Tüm dağıtımları tek bir klasöre yedekleyin — içindekilerin listesiyle birlikte — ve başka bir bilgisayarda geri yükleyin
 - [x] WSL'in asla geri vermediği alanı geri kazanmak için sanal diskleri sıkıştırın
 - [x] Ubuntu, Debian, Alpine, Kali Linux, openSUSE, SLES ve WSL'in kabul ettiği her şeyi destekler
 
