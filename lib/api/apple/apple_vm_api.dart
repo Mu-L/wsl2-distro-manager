@@ -164,6 +164,94 @@ bool tarExitedWithWarningsOnly(String stderr) {
   return lines.isNotEmpty && lines.every(_tarLiveWarning.hasMatch);
 }
 
+/// Which step of a long create `vmctl` is on; see `InstallProgress` on the
+/// Swift side, which writes these.
+enum VmCreatePhase {
+  /// Asking Apple which macOS restore image this Mac supports.
+  lookup,
+
+  /// Fetching that restore image — several GB, and most of the wait.
+  download,
+
+  /// Writing the platform blobs and the guest's disk.
+  prepare,
+
+  /// The macOS installer itself.
+  install,
+}
+
+/// One `progress {...}` line from a create, parsed.
+///
+/// A macOS guest takes tens of minutes to build and the app used to show a
+/// single "Creating instance" for all of it (bostrot/ai-tasks#100), with no
+/// way to tell a download that is still going from one that has stalled.
+class VmCreateProgress {
+  const VmCreateProgress(
+    this.phase, {
+    this.fraction,
+    this.received,
+    this.total,
+  });
+
+  final VmCreatePhase phase;
+
+  /// How far this step is, 0..1, or null for a step that cannot say.
+  final double? fraction;
+
+  /// Bytes so far and expected, for [VmCreatePhase.download]; null when the
+  /// server sent no length.
+  final int? received;
+  final int? total;
+
+  static const _prefix = 'progress ';
+
+  /// The helper that shipped before this protocol existed reported the
+  /// installer as `install 42%` and nothing else. A dev run picks its
+  /// `vmctl` up from the install path, which an app rebuild does not
+  /// refresh, so the app has to read the old form too rather than show a
+  /// dead progress bar next to a helper that is talking.
+  static final RegExp _legacyInstall = RegExp(r'^install (\d{1,3})%$');
+
+  static const Map<String, VmCreatePhase> _phases = {
+    'lookup': VmCreatePhase.lookup,
+    'download': VmCreatePhase.download,
+    'prepare': VmCreatePhase.prepare,
+    'install': VmCreatePhase.install,
+  };
+
+  /// Parses one line of the helper's stderr, or returns null for anything
+  /// that is not a progress report — a diagnostic, or a phase from a newer
+  /// helper than this build knows about. Nothing here may throw: the same
+  /// stream carries the message a failed create is reported with.
+  static VmCreateProgress? parse(String line) {
+    final text = line.trim();
+    if (!text.startsWith(_prefix)) {
+      final legacy = _legacyInstall.firstMatch(text);
+      if (legacy == null) return null;
+      final percent = int.parse(legacy.group(1)!).clamp(0, 100);
+      return VmCreateProgress(VmCreatePhase.install, fraction: percent / 100);
+    }
+    Object? decoded;
+    try {
+      decoded = json.decode(text.substring(_prefix.length));
+    } on FormatException {
+      return null;
+    }
+    if (decoded is! Map) return null;
+    final phase = _phases[decoded['phase']];
+    if (phase == null) return null;
+    final fraction = decoded['fraction'];
+    final received = decoded['received'];
+    final total = decoded['total'];
+    return VmCreateProgress(
+      phase,
+      fraction: fraction is num ? fraction.toDouble().clamp(0.0, 1.0) : null,
+      received: received is num ? received.toInt() : null,
+      total: total is num && total > 0 ? total.toInt() : null,
+    );
+  }
+}
+
 /// Manages Linux and macOS virtual machines through Apple's
 /// Virtualization.framework, by driving the bundled `vmctl` helper.
 ///
@@ -269,6 +357,65 @@ class AppleVmApi extends VmBackend {
           : 'vmctl ${args.join(' ')} failed with exit code ${result.exitCode}');
     }
     return stdout;
+  }
+
+  /// [_runChecked] for a command that takes long enough to need reporting:
+  /// its stderr is read line by line, `progress {...}` lines go to
+  /// [onProgress] and everything else goes to [onStatus] as well as being
+  /// kept as the detail a failure is reported with.
+  ///
+  /// Buffering the whole thing the way [_run] does would hand the caller a
+  /// finished install and nothing in between — which is what a macOS create
+  /// looked like from the create page. The plain lines are forwarded too
+  /// because they are the only thing a helper older than this protocol
+  /// says; without them such a create is silent again.
+  Future<String> _runStreamed(
+    List<String> args, {
+    void Function(VmCreateProgress)? onProgress,
+    void Function(String)? onStatus,
+  }) async {
+    final Process process;
+    try {
+      process = await shell.start(
+        helperPath(),
+        [..._baseArgs(), ...args],
+        runInShell: false,
+      );
+    } on ProcessException catch (e) {
+      throw AppleVmException(
+          'Could not run the vmctl helper (${helperPath()}): ${e.message}');
+    }
+
+    final stdout = StringBuffer();
+    final stdoutDone = process.stdout
+        .transform(const Utf8Decoder(allowMalformed: true))
+        .forEach(stdout.write);
+    final diagnostics = <String>[];
+    final stderrDone = process.stderr
+        .transform(const Utf8Decoder(allowMalformed: true))
+        .transform(const LineSplitter())
+        .forEach((line) {
+      final update = VmCreateProgress.parse(line);
+      if (update != null) {
+        onProgress?.call(update);
+        return;
+      }
+      final text = line.trim();
+      if (text.isEmpty) return;
+      diagnostics.add(text);
+      onStatus?.call(text);
+    });
+
+    final exitCode = await process.exitCode;
+    await stdoutDone;
+    await stderrDone;
+    if (exitCode != 0) {
+      final detail = diagnostics.join('\n').trim();
+      throw AppleVmException(detail.isNotEmpty
+          ? detail
+          : 'vmctl ${args.join(' ')} failed with exit code $exitCode');
+    }
+    return stdout.toString();
   }
 
   Future<List<AppleVmInfo>> listVms() async {
@@ -896,14 +1043,23 @@ class AppleVmApi extends VmBackend {
 
   /// Create a macOS guest VM (Apple Silicon only). [restoreImagePath] is a
   /// local `.ipsw`; without it vmctl downloads the latest supported one.
+  ///
+  /// [onProgress] is called for each step the helper reports — the download
+  /// and the installer both with a fraction — and [onStatus] for whatever
+  /// else it prints, so an older helper that reports no steps still shows
+  /// the caller it is alive. This one is streamed rather than buffered
+  /// because it runs for tens of minutes; a Linux create is over in seconds
+  /// and stays on [_runChecked].
   Future<String> createMacosVm(
     String name, {
     String? restoreImagePath,
     int diskSizeGb = 64,
     int cpus = 4,
     int memoryGb = 8,
+    void Function(VmCreateProgress)? onProgress,
+    void Function(String)? onStatus,
   }) {
-    return _runChecked([
+    return _runStreamed([
       'create',
       '--name', name,
       '--os', 'macos',
@@ -912,7 +1068,7 @@ class AppleVmApi extends VmBackend {
       '--memory', '$memoryGb',
       if (restoreImagePath != null && restoreImagePath.isNotEmpty)
         ...['--restore-image', restoreImagePath],
-    ]);
+    ], onProgress: onProgress, onStatus: onStatus);
   }
 
   /// Present a running VM's display window (opening it on first use — a

@@ -11,7 +11,8 @@ public enum MacInstaller {
         store: VMStore,
         config: inout VMConfig,
         restoreImagePath: String?,
-        diskSizeBytes: UInt64
+        diskSizeBytes: UInt64,
+        progress: InstallProgressReporter = InstallProgressReporter()
     ) throws {
         let fm = FileManager.default
         try fm.createDirectory(at: store.vmDir(config.name), withIntermediateDirectories: true)
@@ -23,9 +24,10 @@ public enum MacInstaller {
             }
             imageURL = URL(fileURLWithPath: restoreImagePath)
         } else {
-            imageURL = try downloadLatestRestoreImage(store: store)
+            imageURL = try downloadLatestRestoreImage(store: store, progress: progress)
         }
 
+        progress.report(.prepare)
         let restoreImage = try loadRestoreImage(imageURL)
         guard let requirements = restoreImage.mostFeaturefulSupportedConfiguration else {
             throw VmctlError("This restore image is not supported on this Mac.")
@@ -53,13 +55,13 @@ public enum MacInstaller {
         let vzConfig = try VMFactory.macosConfiguration(config, store: store)
         let vm = VZVirtualMachine(configuration: vzConfig)
 
+        progress.report(.install, fraction: 0)
         var installError: Error?
         let done = DispatchSemaphore(value: 0)
         DispatchQueue.main.async {
             let installer = VZMacOSInstaller(virtualMachine: vm, restoringFromImageAt: imageURL)
-            let observation = installer.progress.observe(\.fractionCompleted) { progress, _ in
-                FileHandle.standardError.write(
-                    Data("install \(Int(progress.fractionCompleted * 100))%\n".utf8))
+            let observation = installer.progress.observe(\.fractionCompleted) { installProgress, _ in
+                progress.report(.install, fraction: installProgress.fractionCompleted)
             }
             installer.install { result in
                 _ = observation
@@ -99,13 +101,16 @@ public enum MacInstaller {
     }
 
     /// Download the newest supported ipsw into the store (cached across VMs).
-    static func downloadLatestRestoreImage(store: VMStore) throws -> URL {
+    static func downloadLatestRestoreImage(
+        store: VMStore, progress: InstallProgressReporter = InstallProgressReporter()
+    ) throws -> URL {
         try store.ensureExists()
         let target = store.root.appendingPathComponent("RestoreImage.ipsw")
         if FileManager.default.fileExists(atPath: target.path) {
             return target
         }
 
+        progress.report(.lookup)
         var latest: Result<VZMacOSRestoreImage, Error>?
         let fetched = DispatchSemaphore(value: 0)
         VZMacOSRestoreImage.fetchLatestSupported { result in
@@ -119,8 +124,12 @@ public enum MacInstaller {
             throw VmctlError("Could not determine the latest macOS restore image.")
         }
 
+        // Not a progress line: the app keeps the plain ones as the detail a
+        // failed create is reported with, and which image it was downloading
+        // is the first thing worth knowing about a download that failed.
         FileHandle.standardError.write(
             Data("downloading restore image from \(image.url)\n".utf8))
+        progress.report(.download, fraction: 0)
         var downloadResult: Result<URL, Error>?
         let downloaded = DispatchSemaphore(value: 0)
         let task = URLSession.shared.downloadTask(with: image.url) { location, _, error in
@@ -131,10 +140,30 @@ public enum MacInstaller {
             }
             downloaded.signal()
         }
+        // Several GB over whatever line the Mac is on: without this the app
+        // sat on one unchanging message for the better part of an hour.
+        let observation = task.progress.observe(\.fractionCompleted) { [weak task] _, _ in
+            guard let task else { return }
+            // The byte counts come from the task, not from its `Progress`:
+            // a download task's progress counts in units of its own (100 of
+            // them), so completedUnitCount as "bytes" reads 5 of 100 on a
+            // 14 GB image. A response without a Content-Length leaves the
+            // expected count at -1, and reporting that as a percent would
+            // pin the app's bar at 0% for an hour, so such a download
+            // counts bytes only.
+            let received = task.countOfBytesReceived
+            let expected = task.countOfBytesExpectedToReceive
+            progress.report(
+                .download,
+                fraction: expected > 0 ? Double(received) / Double(expected) : nil,
+                received: UInt64(max(received, 0)),
+                total: UInt64(max(expected, 0)))
+        }
         task.resume()
         while downloaded.wait(timeout: .now()) == .timedOut {
             RunLoop.main.run(mode: .default, before: Date().addingTimeInterval(0.5))
         }
+        observation.invalidate()
         switch downloadResult {
         case .success(let location):
             try FileManager.default.moveItem(at: location, to: target)

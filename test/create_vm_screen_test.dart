@@ -439,6 +439,213 @@ void main() {
         .onPressed, isNotNull);
   });
 
+  group('macOS create progress', () {
+    /// Selects the macOS guest and names the VM; a macOS guest needs no
+    /// boot source, the helper downloads a restore image when none is given.
+    Future<void> fillMacosForm(WidgetTester tester) async {
+      await pump(tester);
+      await tester.tap(find.byKey(const ValueKey('test-vm-guest-os')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('macOS').last);
+      await tester.pumpAndSettle();
+      await tester.enterText(
+          find.byKey(const ValueKey('test-vm-name')), 'sequoia');
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(
+          find.byKey(const ValueKey('test-vm-create-button')));
+      await tester.tap(find.byKey(const ValueKey('test-vm-create-button')));
+    }
+
+    String progressText(WidgetTester tester) => tester
+        .widget<Text>(find.byKey(const ValueKey('test-vm-create-progress')))
+        .data!;
+
+    testWidgets('each step the helper reports reaches the page and the bar',
+        (tester) async {
+      shell.responses['create'] = '{"created":"sequoia"}';
+      shell.errors['create'] =
+          'progress {"fraction":0.5,"phase":"download","received":1048576,'
+          '"total":2097152}\n';
+      // The helper stays alive: a create that has already returned has
+      // nothing left to report, which is exactly the old behaviour
+      // (bostrot/ai-tasks#100).
+      shell.startDelay = const Duration(seconds: 2);
+
+      await fillMacosForm(tester);
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+      expect(progressText(tester), contains('50%'));
+      expect(progressText(tester), contains('1.0 MB / 2.0 MB'));
+      expect(progressText(tester), contains('vmcreatedownload-text'));
+      expect(
+          tester
+              .widget<ProgressBar>(
+                  find.byKey(const ValueKey('test-vm-create-progress-bar')))
+              .value,
+          50.0);
+      // The status bar says the same thing: the user does not have to stay
+      // on this page to see where the install is.
+      expect(messages.last, contains('50%'));
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('test-vm-create-progress')), findsNothing);
+    });
+
+    testWidgets('a step that cannot say how far it is still says what it is',
+        (tester) async {
+      shell.responses['create'] = '{"created":"sequoia"}';
+      shell.errors['create'] = 'progress {"phase":"lookup"}\n';
+      shell.startDelay = const Duration(seconds: 2);
+
+      await fillMacosForm(tester);
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
+      expect(progressText(tester), 'vmcreatelookup-text');
+      expect(
+          tester
+              .widget<ProgressBar>(
+                  find.byKey(const ValueKey('test-vm-create-progress-bar')))
+              .value,
+          isNull,
+          reason: 'an indeterminate step gets an indeterminate bar');
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+    });
+
+    /// The helper the app runs is whatever is installed, and a rebuilt app
+    /// does not rebuild it (bostrot/ai-tasks#100): the page has to move on
+    /// a helper that reports no steps at all, or the whole hour looks the
+    /// way it did before this feature existed.
+    testWidgets('a helper that reports no steps still shows what it printed',
+        (tester) async {
+      shell.responses['create'] = '{"created":"sequoia"}';
+      shell.errors['create'] =
+          'downloading restore image from https://example.invalid/r.ipsw\n';
+      shell.startDelay = const Duration(seconds: 2);
+
+      await fillMacosForm(tester);
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
+      expect(progressText(tester),
+          'downloading restore image from https://example.invalid/r.ipsw');
+      expect(messages.last, contains('example.invalid'));
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('a step and a printed line are shown one under the other',
+        (tester) async {
+      shell.responses['create'] = '{"created":"sequoia"}';
+      shell.errors['create'] =
+          'downloading restore image from https://example.invalid/r.ipsw\n'
+          'progress {"fraction":0.5,"phase":"download"}\n';
+      shell.startDelay = const Duration(seconds: 2);
+
+      await fillMacosForm(tester);
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
+      expect(progressText(tester), contains('vmcreatedownload-text'));
+      expect(
+          tester
+              .widget<Text>(
+                  find.byKey(const ValueKey('test-vm-create-detail')))
+              .data,
+          contains('example.invalid'));
+      // Once a step is known the status bar says that, not the line.
+      expect(messages.last, contains('vmcreatedownload-text'));
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('a line from an earlier step does not follow the next one',
+        (tester) async {
+      shell.responses['create'] = '{"created":"sequoia"}';
+      shell.errors['create'] =
+          'downloading restore image from https://example.invalid/r.ipsw\n'
+          'progress {"fraction":1,"phase":"download"}\n'
+          'progress {"phase":"install","fraction":0.1}\n';
+      shell.startDelay = const Duration(seconds: 2);
+
+      await fillMacosForm(tester);
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
+      expect(progressText(tester), contains('vmcreateinstall-text'));
+      expect(find.byKey(const ValueKey('test-vm-create-detail')), findsNothing);
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('a download of unknown length shows the bytes so far',
+        (tester) async {
+      shell.responses['create'] = '{"created":"sequoia"}';
+      shell.errors['create'] =
+          'progress {"phase":"download","received":1048576}\n';
+      shell.startDelay = const Duration(seconds: 2);
+
+      await fillMacosForm(tester);
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
+      expect(progressText(tester), 'vmcreatedownload-text 1.0 MB');
+      expect(
+          tester
+              .widget<ProgressBar>(
+                  find.byKey(const ValueKey('test-vm-create-progress-bar')))
+              .value,
+          isNull);
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('a failed create keeps the helper\'s words on the page',
+        (tester) async {
+      shell.exitCodes['create'] = 1;
+      shell.errors['create'] = 'progress {"phase":"prepare"}\n'
+          'macOS installation failed: no space left on device\n';
+
+      await fillMacosForm(tester);
+      await tester.pumpAndSettle();
+
+      // The status bar clears itself after a few seconds; an install that
+      // failed at minute fifty must leave something to read.
+      await tester.pump(const Duration(seconds: 30));
+      final banner = find.byKey(const ValueKey('test-vm-create-error'));
+      expect(banner, findsOneWidget);
+
+      // The helper's own words are a fold away, the way every other error
+      // surface in the app carries them.
+      await tester.tap(find.descendant(
+          of: banner,
+          matching: find.byKey(const ValueKey('test-error-details-toggle'))));
+      await tester.pumpAndSettle();
+      expect(
+          find.descendant(
+              of: banner,
+              matching: find.text(
+                  'macOS installation failed: no space left on device')),
+          findsOneWidget);
+      // The progress line it failed on is not part of the complaint.
+      expect(find.textContaining('progress {'), findsNothing);
+      expect(find.byKey(const ValueKey('test-vm-create-progress')), findsNothing);
+    });
+  });
+
   group('cloud-init', () {
     testWidgets('the picker is offered for a Linux guest and not for macOS',
         (tester) async {

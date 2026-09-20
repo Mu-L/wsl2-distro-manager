@@ -950,6 +950,137 @@ void main() {
             '--restore-image', '/tmp/r.ipsw',
           ]));
     });
+
+    test('macos create reports every step the helper announces', () async {
+      shell.responses['create'] = '{"created":"sequoia"}';
+      shell.errors['create'] = [
+        'progress {"phase":"lookup"}',
+        'progress {"fraction":0.5,"phase":"download","received":7,"total":14}',
+        'progress {"phase":"prepare"}',
+        'progress {"fraction":0.25,"phase":"install"}',
+      ].join('\n');
+
+      final seen = <VmCreateProgress>[];
+      await api.createMacosVm('sequoia', onProgress: seen.add);
+
+      expect(seen.map((u) => u.phase), [
+        VmCreatePhase.lookup,
+        VmCreatePhase.download,
+        VmCreatePhase.prepare,
+        VmCreatePhase.install,
+      ]);
+      expect(seen[1].fraction, 0.5);
+      expect(seen[1].received, 7);
+      expect(seen[1].total, 14);
+      expect(seen[3].fraction, 0.25);
+      // Streamed, not buffered: a create that runs for an hour has to say
+      // something before it is over.
+      expect(lastCall().first, 'start:/fake/vmctl');
+    });
+
+    test('a failed macos create is reported without its progress lines',
+        () async {
+      shell.exitCodes['create'] = 1;
+      shell.errors['create'] = [
+        'progress {"fraction":1,"phase":"download"}',
+        'macOS installation failed: no space left on device',
+      ].join('\n');
+
+      final seen = <VmCreateProgress>[];
+      await expectLater(
+          api.createMacosVm('sequoia', onProgress: seen.add),
+          throwsA(isA<AppleVmException>().having((e) => e.message, 'message',
+              'macOS installation failed: no space left on device')));
+      expect(seen, hasLength(1));
+    });
+
+    test('the helper\'s plain lines reach the caller as status', () async {
+      shell.responses['create'] = '{"created":"sequoia"}';
+      shell.errors['create'] = [
+        'downloading restore image from https://example.invalid/r.ipsw',
+        'progress {"phase":"download","fraction":0.5}',
+        '',
+      ].join('\n');
+
+      final status = <String>[];
+      final seen = <VmCreateProgress>[];
+      await api.createMacosVm('sequoia',
+          onProgress: seen.add, onStatus: status.add);
+
+      // Only the plain line, and without the blank one after it: this is
+      // what a create shows while the helper reports no step at all.
+      expect(status,
+          ['downloading restore image from https://example.invalid/r.ipsw']);
+      expect(seen, hasLength(1));
+    });
+
+    /// A dev run resolves `vmctl` from the install path, which rebuilding
+    /// the app does not refresh, so the app has to cope with the helper
+    /// that shipped before the progress protocol (bostrot/ai-tasks#100).
+    test('an older helper\'s install percentage still drives the bar',
+        () async {
+      shell.responses['create'] = '{"created":"sequoia"}';
+      shell.errors['create'] = [
+        'downloading restore image from https://example.invalid/r.ipsw',
+        'install 41%',
+        'install 42%',
+      ].join('\n');
+
+      final status = <String>[];
+      final seen = <VmCreateProgress>[];
+      await api.createMacosVm('sequoia',
+          onProgress: seen.add, onStatus: status.add);
+
+      expect(seen.map((u) => u.phase),
+          [VmCreatePhase.install, VmCreatePhase.install]);
+      expect(seen.last.fraction, closeTo(0.42, 1e-9));
+      expect(status, hasLength(1));
+    });
+  });
+
+  group('create progress lines', () {
+    test('a line without the prefix is not progress', () {
+      expect(VmCreateProgress.parse('installing macOS'), isNull);
+      expect(VmCreateProgress.parse(''), isNull);
+    });
+
+    /// The helper and the app ship together, but a user can end up with an
+    /// older app next to a newer helper; an unknown phase has to be
+    /// ignorable rather than fatal.
+    test('malformed or unknown reports are ignored, never thrown', () {
+      expect(VmCreateProgress.parse('progress not json'), isNull);
+      expect(VmCreateProgress.parse('progress ["download"]'), isNull);
+      expect(VmCreateProgress.parse('progress {"phase":"reticulating"}'),
+          isNull);
+    });
+
+    test('a fraction outside 0..1 is clamped to the bar', () {
+      expect(
+          VmCreateProgress.parse('progress {"phase":"install","fraction":1.4}')!
+              .fraction,
+          1.0);
+      expect(
+          VmCreateProgress.parse('progress {"phase":"install","fraction":-2}')!
+              .fraction,
+          0.0);
+    });
+
+    test('the pre-protocol install line is read as install progress', () {
+      final update = VmCreateProgress.parse('install 7%')!;
+      expect(update.phase, VmCreatePhase.install);
+      expect(update.fraction, closeTo(0.07, 1e-9));
+      expect(VmCreateProgress.parse('install 100%')!.fraction, 1.0);
+      // Only that exact shape: the helper's prose is a diagnostic.
+      expect(VmCreateProgress.parse('install failed: 7% done'), isNull);
+      expect(VmCreateProgress.parse('installing 7%'), isNull);
+    });
+
+    test('a download of unknown length carries no total', () {
+      final update =
+          VmCreateProgress.parse('progress {"phase":"download","total":0}')!;
+      expect(update.total, isNull);
+      expect(update.fraction, isNull);
+    });
   });
 
   group('root filesystem transfer', () {

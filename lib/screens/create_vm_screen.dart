@@ -11,6 +11,7 @@ import 'package:wsl2distromanager/api/wsl.dart' show formatTransferSize;
 import 'package:wsl2distromanager/components/analytics.dart';
 import 'package:wsl2distromanager/components/busy_button.dart';
 import 'package:wsl2distromanager/components/cloud_init_picker.dart';
+import 'package:wsl2distromanager/components/error_view.dart';
 import 'package:wsl2distromanager/components/form_card.dart';
 import 'package:wsl2distromanager/components/helpers.dart';
 import 'package:wsl2distromanager/components/notify.dart';
@@ -71,6 +72,31 @@ class _CreateVmPageState extends State<CreateVmPage> {
   CancelSignal? _cancelSignal;
   String? _downloadLabel;
   double? _downloadFraction;
+
+  /// What the helper is doing right now, and how far it is — a macOS guest
+  /// downloads several GB and then runs a full installer, and the page used
+  /// to show one unchanging "Creating instance" for the whole hour
+  /// (bostrot/ai-tasks#100). Null outside a create that reports progress.
+  String? _createLabel;
+  double? _createFraction;
+
+  /// The last plain line the helper printed. A helper older than the
+  /// progress protocol reports no steps at all, and a dev run keeps using
+  /// the installed `vmctl` until it is rebuilt, so this is what stops the
+  /// page going quiet again; with a current helper it names the restore
+  /// image being fetched.
+  String? _createDetail;
+
+  /// The step [_createDetail] belongs to, so a line about the download
+  /// does not sit under "Installing macOS" once the download is over.
+  VmCreatePhase? _createPhase;
+
+  /// A failed create, kept on the page. The status bar drops its message
+  /// after a few seconds, so an install that failed at minute fifty left
+  /// nothing behind to read. [_createErrorName] is the name that create was
+  /// for: the field is editable again while the banner is up.
+  String? _createError;
+  String _createErrorName = '';
 
   @override
   void initState() {
@@ -171,6 +197,11 @@ class _CreateVmPageState extends State<CreateVmPage> {
       _nameError = null;
       _userError = null;
       _bootSourceError = null;
+      _createError = null;
+      _createLabel = null;
+      _createFraction = null;
+      _createDetail = null;
+      _createPhase = null;
       _creating = true;
     });
 
@@ -241,6 +272,8 @@ class _CreateVmPageState extends State<CreateVmPage> {
           diskSizeGb: _intOf(_diskSize, 64),
           cpus: _intOf(_cpus, 4),
           memoryGb: _intOf(_memory, 8),
+          onProgress: _reportCreateProgress,
+          onStatus: _reportCreateStatus,
         );
       } else {
         await api.createLinuxVm(
@@ -276,9 +309,85 @@ class _CreateVmPageState extends State<CreateVmPage> {
     } catch (error) {
       Notify.message('${'vmcreatefailed-text'.i18n([name])} $error',
           severity: InfoBarSeverity.error);
+      if (mounted) {
+        setState(() {
+          _createError = '$error';
+          _createErrorName = name;
+        });
+      }
     } finally {
-      if (mounted) setState(() => _creating = false);
+      if (mounted) {
+        setState(() {
+          _creating = false;
+          _createLabel = null;
+          _createFraction = null;
+          _createDetail = null;
+          _createPhase = null;
+        });
+      }
     }
+  }
+
+  /// One step the helper reported, turned into the page's progress bar and
+  /// the status bar's message — the latter because the create screen is not
+  /// where the user necessarily waits.
+  void _reportCreateProgress(VmCreateProgress update) {
+    if (!mounted) return;
+    final label = _createProgressLabel(update);
+    setState(() {
+      // Only on a *change* of step: the line naming the restore image is
+      // printed just before the download step is announced, and belongs to
+      // it.
+      if (_createPhase != null && update.phase != _createPhase) {
+        _createDetail = null;
+      }
+      _createPhase = update.phase;
+      _createLabel = label;
+      _createFraction = update.fraction;
+    });
+    Notify.message(label, loading: true);
+  }
+
+  /// Whatever the helper said that was not a step. Shown under the bar,
+  /// and in the status bar while no step has been reported — an older
+  /// helper only ever gets this far, and one unchanging message for an
+  /// hour is what this issue was about.
+  void _reportCreateStatus(String line) {
+    if (!mounted) return;
+    setState(() => _createDetail = line);
+    if (_createLabel == null) Notify.message(line, loading: true);
+  }
+
+  /// "Downloading the macOS restore image 42% (6.0 GB / 14.2 GB)" and the
+  /// like: the step in words, then whatever numbers it has.
+  static String _createProgressLabel(VmCreateProgress update) {
+    String step;
+    switch (update.phase) {
+      case VmCreatePhase.lookup:
+        step = 'vmcreatelookup-text'.i18n();
+        break;
+      case VmCreatePhase.download:
+        step = 'vmcreatedownload-text'.i18n();
+        break;
+      case VmCreatePhase.prepare:
+        step = 'vmcreateprepare-text'.i18n();
+        break;
+      case VmCreatePhase.install:
+        step = 'vmcreateinstall-text'.i18n();
+        break;
+    }
+    final fraction = update.fraction;
+    final received = update.received;
+    final total = update.total;
+    // A download the server sent no length for has bytes and no percent;
+    // saying how much has arrived still tells the user it is moving.
+    if (fraction == null) {
+      return received == null ? step : '$step ${formatTransferSize(received)}';
+    }
+    final percent = '${(fraction * 100).toStringAsFixed(0)}%';
+    if (received == null || total == null) return '$step $percent';
+    return '$step $percent '
+        '(${formatTransferSize(received)} / ${formatTransferSize(total)})';
   }
 
   /// The boot-source choice for a Linux guest: two radio buttons and one
@@ -481,6 +590,23 @@ class _CreateVmPageState extends State<CreateVmPage> {
                 description: 'vmcreateinfo-text'.i18n(),
               ),
               const SizedBox(height: 20),
+              // A create that fails after an hour deserves better than a
+              // status bar that clears itself: the helper's own words stay
+              // here until the next attempt, foldable and selectable so
+              // they can be pasted into a report.
+              if (_createError != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: InfoBar(
+                    key: const ValueKey('test-vm-create-error'),
+                    title:
+                        Text('vmcreatefailed-text'.i18n([_createErrorName])),
+                    content: ErrorDetails(details: _createError!),
+                    severity: InfoBarSeverity.error,
+                    isLong: true,
+                    onClose: () => setState(() => _createError = null),
+                  ),
+                ),
               FormCard(
                 icon: FluentIcons.text_document,
                 title: 'createbasics-text'.i18n(),
@@ -630,6 +756,41 @@ class _CreateVmPageState extends State<CreateVmPage> {
                 ],
               ),
               const SizedBox(height: 20),
+              // Either half is enough to show the block: a helper that
+              // reports no steps still prints lines, and those are then all
+              // the page has to say the create is alive.
+              if (_createLabel != null || _createDetail != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        child: ProgressBar(
+                          key: const ValueKey('test-vm-create-progress-bar'),
+                          value: _createFraction == null
+                              ? null
+                              : (_createFraction! * 100).clamp(0.0, 100.0),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(_createLabel ?? _createDetail!,
+                          key: const ValueKey('test-vm-create-progress'),
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: secondaryTextColor(context))),
+                      if (_createLabel != null && _createDetail != null)
+                        Text(_createDetail!,
+                            key: const ValueKey('test-vm-create-detail'),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                fontSize: 11,
+                                color: secondaryTextColor(context))),
+                    ],
+                  ),
+                ),
               Row(
                 children: [
                   BusyButton(
