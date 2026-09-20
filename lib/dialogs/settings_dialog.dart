@@ -4,6 +4,7 @@ import 'package:localization/localization.dart';
 import 'package:wsl2distromanager/components/analytics.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:wsl2distromanager/api/default_user_service.dart';
 import 'package:wsl2distromanager/api/wsl.dart';
 import 'package:wsl2distromanager/api/wsl_errors.dart';
 import 'package:wsl2distromanager/components/debounced_text_box.dart';
@@ -600,21 +601,43 @@ class WslConfDraft {
       final setting = wslConfSettings.firstWhere((s) => s.prefKey == entry.key);
       final value = entry.value;
       final bool ok;
+      // `[user] default` is the one key with a second, immediate route — and
+      // the one whose wrong value stops the distro from starting — so it goes
+      // through the service that knows both, rather than straight to the file
+      // like every other key here. See lib/api/default_user_service.dart.
+      final bool isDefaultUser =
+          setting.section == 'user' && setting.key == 'default';
       if (value == null) {
         // An emptied box means "unset", which has to delete the line: writing
         // `hostname =` back would pin the distro to an empty value instead of
         // letting WSL fall back to the Windows computer name.
         await prefs.remove('$item-${setting.prefKey}');
-        ok = await wslApiBuilder()
-            .removeSetting(item, setting.section, setting.key);
+        if (isDefaultUser) {
+          final cleared =
+              await DefaultUserService(wslApiBuilder()).clearDefaultUser(item);
+          ok = cleared.ok;
+        } else {
+          ok = await wslApiBuilder()
+              .removeSetting(item, setting.section, setting.key);
+        }
       } else {
         if (setting.isToggle) {
           await prefs.setBool('$item-${setting.prefKey}', value == 'true');
         } else {
           await prefs.setString('$item-${setting.prefKey}', value);
         }
-        ok = await wslApiBuilder()
-            .setSetting(item, setting.section, setting.key, value);
+        if (isDefaultUser) {
+          final applied = await DefaultUserService(wslApiBuilder())
+              .setDefaultUser(item, value);
+          ok = applied.ok;
+          // A name the distro has no account for was written verbatim before
+          // and left it unable to start; the pref mirror must not keep
+          // claiming a value the file does not have.
+          if (!ok) await prefs.remove('$item-${setting.prefKey}');
+        } else {
+          ok = await wslApiBuilder()
+              .setSetting(item, setting.section, setting.key, value);
+        }
       }
       if (!ok) failed.add(setting);
     }

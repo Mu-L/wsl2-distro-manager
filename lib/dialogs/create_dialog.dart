@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:localization/localization.dart';
 import 'package:wsl2distromanager/api/cancellation.dart';
 import 'package:wsl2distromanager/api/cloud_init.dart';
+import 'package:wsl2distromanager/api/default_user_service.dart';
 import 'package:wsl2distromanager/api/docker_images.dart';
 import 'package:wsl2distromanager/components/analytics.dart';
 import 'package:wsl2distromanager/api/wsl.dart';
@@ -447,17 +448,32 @@ Future<bool> createInstance(
           Notify.message('passwordwindowopen-text'.i18n([user]),
               loading: true);
           await api.exec(name, ['passwd $user']);
-          // Use setSetting so existing wsl.conf sections (e.g. [boot] systemd=true) are preserved
-          await api.setSetting(name, 'user', 'default', user);
-          prefs.setString('StartPath_$name', '/home/$user');
-          prefs.setString('StartUser_$name', user);
 
           // Closing that window without typing anything used to leave the
           // account passwordless in silence. Null means the distro could not
           // answer, which is not the same as "no password" and is not warned
           // about.
-          if (await api.hasPassword(name, user) == false) {
+          final bool noPassword = await api.hasPassword(name, user) == false;
+
+          // Last, because it is the step that stops the distro: both
+          // documented routes rather than the `wsl.conf` key alone, since that
+          // key is only read when the distro boots and the `useradd`/`passwd`
+          // above left it running — which is why every `wsl` until the next
+          // idle shutdown still opened the root shell upstream #268 reports.
+          final applied =
+              await DefaultUserService(api).setDefaultUser(name, user);
+          // `/home/$user` is the useradd default, not a fact: Alpine's
+          // `adduser -D` and a reused system account both land elsewhere.
+          prefs.setString('StartPath_$name', applied.home ?? '/home/$user');
+          prefs.setString('StartUser_$name', user);
+
+          if (noPassword) {
             Notify.message('createdinstancenopassword-text'.i18n([user]),
+                severity: InfoBarSeverity.warning);
+          } else if (!applied.ok) {
+            // The account is there; only the default-user setting is not, so
+            // `wsl` would still open this distro as root.
+            Notify.message('createdinstancenouser-text'.i18n(),
                 severity: InfoBarSeverity.warning);
           } else {
             Notify.message('createdinstance-text'.i18n(),
