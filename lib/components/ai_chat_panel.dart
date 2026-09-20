@@ -7,10 +7,20 @@ import 'package:flutter/rendering.dart'
         SelectionEvent,
         SelectionEventType,
         SelectionResult;
-import 'package:flutter/services.dart' show Clipboard, ClipboardData;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/services.dart'
+    show
+        Clipboard,
+        ClipboardData,
+        HardwareKeyboard,
+        KeyDownEvent,
+        KeyEvent,
+        LogicalKeyboardKey;
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:localization/localization.dart';
+import 'package:wsl2distromanager/api/ai_chat_sessions.dart';
 import 'package:wsl2distromanager/api/ai_service.dart';
 import 'package:wsl2distromanager/api/cancellation.dart';
 import 'package:wsl2distromanager/api/license_manager.dart';
@@ -25,7 +35,13 @@ import 'package:wsl2distromanager/dialogs/base_dialog.dart';
 import 'package:wsl2distromanager/nav/router.dart';
 
 class AiChatPanel extends StatefulWidget {
-  const AiChatPanel({Key? key, this.onClose, this.sandbox}) : super(key: key);
+  const AiChatPanel({
+    Key? key,
+    this.onClose,
+    this.sandbox,
+    this.expanded = false,
+    this.onToggleExpanded,
+  }) : super(key: key);
 
   /// Closes the panel. Without it the only way to dismiss the panel was the
   /// FAB behind it (audit PS-34).
@@ -36,6 +52,25 @@ class AiChatPanel extends StatefulWidget {
   /// distro. Null is the normal app-wide assistant.
   final SandboxChat? sandbox;
 
+  /// Whether the dock currently fills the page area. The panel only reports
+  /// the state in its header; the dock owns it.
+  final bool expanded;
+
+  /// Flips [expanded]. Null hides the toggle — the panel is also used
+  /// outside the dock, where there is nothing to expand into.
+  final VoidCallback? onToggleExpanded;
+
+  /// Whether the chord that sends a message is Command rather than Control.
+  ///
+  /// Read off [defaultTargetPlatform] rather than `Platform.isMacOS`: the
+  /// same build of the tests runs on both CI runners, and only the former
+  /// can be pinned from a test.
+  static bool get sendsWithCommand =>
+      defaultTargetPlatform == TargetPlatform.macOS;
+
+  /// How the hint under the box spells that chord.
+  static String get sendModifierLabel => sendsWithCommand ? '⌘' : 'Ctrl';
+
   @override
   State<AiChatPanel> createState() => _AiChatPanelState();
 }
@@ -45,6 +80,10 @@ class _AiChatPanelState extends State<AiChatPanel> {
   final LicenseManager _license = LicenseManager();
   final TodoStore _todos = TodoStore.instance;
   final TextEditingController _inputController = TextEditingController();
+  late final FocusNode _inputFocus = FocusNode(
+    debugLabel: 'AI chat input',
+    onKeyEvent: _onInputKey,
+  );
   final TextEditingController _todoInputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FlyoutController _sessionsFlyout = FlyoutController();
@@ -76,6 +115,36 @@ class _AiChatPanelState extends State<AiChatPanel> {
   static const int _maxAutoContinue = 6;
 
   SandboxChat? get _sandbox => widget.sandbox;
+
+  /// Previous conversations with the app assistant. Sandbox chats are
+  /// already one thread per distro, so they keep their own store.
+  final AiChatSessions _sessions = AiChatSessions.instance;
+
+  /// Whether this panel can start and reopen chats — the app assistant can,
+  /// a sandbox chat is its distro's single thread.
+  bool get _hasSessions => _sandbox == null;
+
+  /// Files the running conversation under "Previous chats" and starts an
+  /// empty one. Clearing used to be the only way to a fresh context, and it
+  /// threw the conversation away (ai-tasks#104).
+  void _newChat() {
+    if (!_hasSessions || _busy) return;
+    _sessions.archive(_ai.conversationHistory);
+    _ai.clearHistory();
+    _unblock();
+    setState(() => _sendFailed = false);
+  }
+
+  /// Puts a stored chat back on screen, filing the running one first.
+  void _openChat(String id) {
+    if (!_hasSessions || _busy) return;
+    final messages = _sessions.switchTo(id, _ai.conversationHistory);
+    if (messages == null) return;
+    _ai.restoreHistory(messages);
+    _unblock();
+    setState(() => _sendFailed = false);
+    _scrollToBottom();
+  }
   List<AiMessage> get _transcript =>
       _sandbox?.history ?? _ai.conversationHistory;
 
@@ -120,6 +189,13 @@ class _AiChatPanelState extends State<AiChatPanel> {
     _ai.init().then((_) => setState(() {}));
     _todos.addListener(_onTodosChanged);
     _ai.transcriptRevision.addListener(_onTranscriptChanged);
+    _sessions.addListener(_onSessionsChanged);
+  }
+
+  /// A chat was filed away or reopened: the history flyout and the header
+  /// count come from the store, so repaint.
+  void _onSessionsChanged() {
+    if (mounted) setState(() {});
   }
 
   void _onTodosChanged() {
@@ -171,6 +247,28 @@ class _AiChatPanelState extends State<AiChatPanel> {
       _requestGeneration++;
       _isLoading = false;
     });
+  }
+
+  /// Enter puts in a newline, the platform's chord sends — the box holds a
+  /// multi-line question now, and Enter used to fire it off half-written
+  /// (ai-tasks#104).
+  ///
+  /// This sits on the input's own focus node, the first thing a key press
+  /// reaches. Reporting the chord as handled is also what keeps the engine
+  /// from turning that same press into a line break in the box.
+  KeyEventResult _onInputKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (event.logicalKey != LogicalKeyboardKey.enter &&
+        event.logicalKey != LogicalKeyboardKey.numpadEnter) {
+      return KeyEventResult.ignored;
+    }
+    final keyboard = HardwareKeyboard.instance;
+    final sends = AiChatPanel.sendsWithCommand
+        ? keyboard.isMetaPressed
+        : keyboard.isControlPressed;
+    if (!sends) return KeyEventResult.ignored;
+    _sendMessage();
+    return KeyEventResult.handled;
   }
 
   Future<void> _sendMessage() async {
@@ -331,9 +429,33 @@ class _AiChatPanelState extends State<AiChatPanel> {
               const BetaBadge(),
               const Spacer(),
               const SizedBox(width: 4),
-              // Switch between the app assistant and sandbox sessions —
-              // their transcripts persist, so any of them can be reopened.
+              // Start a fresh context without losing the running thread:
+              // it is filed under "Previous chats" (ai-tasks#104).
+              if (_hasSessions)
+                NamedIconButton(
+                  key: const ValueKey('test-chat-new'),
+                  label: 'ai-new-chat-text'.i18n(),
+                  icon: FluentIcons.add,
+                  iconSize: 14,
+                  onPressed: (_busy || history.isEmpty) ? null : _newChat,
+                ),
+              // Switch between the app assistant, sandbox sessions and the
+              // chats filed away earlier — every transcript persists, so any
+              // of them can be reopened.
               _sessionsButton(context),
+              if (widget.onToggleExpanded != null)
+                NamedIconButton(
+                  key: const ValueKey('test-chat-expand'),
+                  label: (widget.expanded
+                          ? 'ai-chat-collapse-text'
+                          : 'ai-chat-expand-text')
+                      .i18n(),
+                  icon: widget.expanded
+                      ? FluentIcons.back_to_window
+                      : FluentIcons.full_screen,
+                  iconSize: 12,
+                  onPressed: widget.onToggleExpanded,
+                ),
               // No quota counter anymore — chat runs on the user's own API
               // key, so usage is between them and their provider.
               const SizedBox(width: 8),
@@ -562,23 +684,46 @@ class _AiChatPanelState extends State<AiChatPanel> {
               ),
             ),
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: TextBox(
-                  controller: _inputController,
-                  placeholder: 'ai-assistant-placeholder'.i18n(),
-                  onChanged: (_) => setState(() {}),
-                  onSubmitted: (_) => _sendMessage(),
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: TextBox(
+                      key: const ValueKey('test-chat-input'),
+                      controller: _inputController,
+                      focusNode: _inputFocus,
+                      placeholder: 'ai-assistant-placeholder'.i18n(),
+                      // A question longer than one line was typed into a
+                      // one-line box; it grows with the text now, capped so
+                      // a pasted log cannot push the transcript out of the
+                      // panel.
+                      minLines: 1,
+                      maxLines: 6,
+                      onChanged: (_) => setState(() {}),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Button(
+                    key: const ValueKey('test-chat-send'),
+                    onPressed:
+                        (_inputController.text.trim().isNotEmpty && !_busy)
+                            ? _sendMessage
+                            : null,
+                    child: Text('ai-send-text'.i18n()),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Button(
-                onPressed:
-                    (_inputController.text.trim().isNotEmpty && !_busy)
-                        ? _sendMessage
-                        : null,
-                child: Text('ai-send-text'.i18n()),
+              const SizedBox(height: 6),
+              // Enter no longer sends, so the box says what does.
+              Text(
+                'ai-send-hint-text'.i18n([AiChatPanel.sendModifierLabel]),
+                style: TextStyle(
+                  fontSize: 10,
+                  color: secondaryTextColor(context),
+                ),
               ),
             ],
           ),
@@ -592,11 +737,13 @@ class _AiChatPanelState extends State<AiChatPanel> {
           ? distro.substring(SandboxService.prefix.length)
           : distro;
 
-  /// Flyout listing the app assistant and every sandbox chat, so a closed
-  /// conversation can be reopened — transcripts persist across close/reopen.
+  /// Flyout listing the app assistant, every sandbox chat and the chats
+  /// filed away earlier, so a closed conversation can be reopened —
+  /// transcripts persist across close/reopen.
   Widget _sessionsButton(BuildContext context) {
     final sandboxes = SandboxService().list();
-    if (sandboxes.isEmpty && _sandbox == null) {
+    final previous = _hasSessions ? _sessions.list() : const <AiChatSession>[];
+    if (sandboxes.isEmpty && _sandbox == null && previous.isEmpty) {
       return const SizedBox.shrink();
     }
     // An icon-only button like its clear/close neighbours, not a
@@ -619,6 +766,7 @@ class _AiChatPanelState extends State<AiChatPanel> {
   MenuFlyout _sessionsMenu() {
     final sandboxes = SandboxService().list();
     final withHistory = SandboxChat.sessions().toSet();
+    final previous = _hasSessions ? _sessions.list() : const <AiChatSession>[];
     return MenuFlyout(
       items: [
         MenuFlyoutItem(
@@ -642,6 +790,37 @@ class _AiChatPanelState extends State<AiChatPanel> {
                     "${'sandbox-session-new-text'.i18n()}"),
             onPressed: () => GlobalVariable.sandboxChat.value = distro,
           ),
+        // The chats "New chat" filed away. Reopening one puts the running
+        // conversation in their place, so nothing is lost either way.
+        if (previous.isNotEmpty) ...[
+          const MenuFlyoutSeparator(),
+          MenuFlyoutItemBuilder(
+            key: const ValueKey('test-chat-history-header'),
+            builder: (context) => Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+              child: Text(
+                'ai-chat-history-text'.i18n(),
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: secondaryTextColor(context),
+                ),
+              ),
+            ),
+          ),
+          for (final session in previous)
+            MenuFlyoutItem(
+              key: ValueKey('test-chat-history-${session.id}'),
+              leading: const SizedBox.square(dimension: 12.0),
+              text: Text(
+                session.title.isEmpty
+                    ? 'ai-chat-untitled-text'.i18n()
+                    : session.title,
+                overflow: TextOverflow.ellipsis,
+              ),
+              onPressed: _busy ? null : () => _openChat(session.id),
+            ),
+        ],
       ],
     );
   }
@@ -936,8 +1115,10 @@ class _AiChatPanelState extends State<AiChatPanel> {
   void dispose() {
     _todos.removeListener(_onTodosChanged);
     _ai.transcriptRevision.removeListener(_onTranscriptChanged);
+    _sessions.removeListener(_onSessionsChanged);
     _sessionsFlyout.dispose();
     _selectionDelegate.dispose();
+    _inputFocus.dispose();
     _inputController.dispose();
     _todoInputController.dispose();
     _scrollController.dispose();

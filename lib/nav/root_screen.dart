@@ -13,6 +13,7 @@ import 'package:wsl2distromanager/api/app_window.dart';
 import 'package:wsl2distromanager/api/experimental_features.dart';
 import 'package:wsl2distromanager/api/license_manager.dart';
 import 'package:wsl2distromanager/api/sandbox_service.dart';
+import 'package:wsl2distromanager/components/ai_chat_dock.dart';
 import 'package:wsl2distromanager/components/ai_chat_panel.dart';
 import 'package:wsl2distromanager/components/helpers.dart';
 import 'package:wsl2distromanager/components/notify.dart';
@@ -274,17 +275,18 @@ class RootPageState extends State<RootPage> with WindowListener {
         // The page plus its status/notification bar. On a short window the
         // bar used to overlay the page bottom; as a column child it takes its
         // own row instead.
+        final statusBar = statusBuilder(
+          status,
+          statusWidget,
+          loading,
+          statusLeading,
+          statusSeverity,
+          clearStatus,
+        );
         final pageWithStatus = Column(
           children: [
             Expanded(child: widget.child),
-            statusBuilder(
-              status,
-              statusWidget,
-              loading,
-              statusLeading,
-              statusSeverity,
-              clearStatus,
-            ),
+            statusBar,
           ],
         );
 
@@ -309,31 +311,23 @@ class RootPageState extends State<RootPage> with WindowListener {
               WidgetsBinding.instance.addPostFrameCallback(
                   (_) => GlobalVariable.sandboxChat.value = null);
             }
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                // A fixed 360px dock took 40% of a narrow window; below
-                // 1000px it scales with the window instead (audit PS-38).
-                final panelWidth = constraints.maxWidth < 1000
-                    ? (constraints.maxWidth * 0.36).roundToDouble()
-                    : 360.0;
-                return Row(
-                  children: [
-                    Expanded(child: pageWithStatus),
-                    Container(width: 1, color: surfaceBorderColor(context)),
-                    SizedBox(
-                      width: panelWidth,
-                      // Keyed: switching between the assistant and a sandbox
-                      // session swaps the panel state instead of mixing them.
-                      child: AiChatPanel(
-                        key: ValueKey('chat-${sandbox ?? 'main'}'),
-                        sandbox:
-                            sandbox == null ? null : SandboxChat.of(sandbox),
-                        onClose: () => GlobalVariable.aiPanel.value = false,
-                      ),
-                    ),
-                  ],
-                );
-              },
+            // The dock owns the split: its width is draggable and
+            // remembered, and expanding it gives the chat the whole page
+            // area while the navigation pane stays put (ai-tasks#104).
+            final docked = sandbox;
+            return AiChatDock(
+              page: widget.child,
+              statusBar: statusBar,
+              panelBuilder: (context, expanded, toggleExpanded) =>
+                  // Keyed: switching between the assistant and a sandbox
+                  // session swaps the panel state instead of mixing them.
+                  AiChatPanel(
+                key: ValueKey('chat-${docked ?? 'main'}'),
+                sandbox: docked == null ? null : SandboxChat.of(docked),
+                onClose: () => GlobalVariable.aiPanel.value = false,
+                expanded: expanded,
+                onToggleExpanded: toggleExpanded,
+              ),
             );
           },
         );

@@ -1008,6 +1008,16 @@ Explain each setting briefly.
     return sendMessage(prompt);
   }
 
+  /// Put a stored conversation back on screen, replacing whatever is there.
+  ///
+  /// Used when a chat is reopened from the history ([AiChatSessions]): the
+  /// transcript is what the next request is completed from, so restoring it
+  /// is what restores the context of that thread.
+  void restoreHistory(List<AiMessage> messages) {
+    _conversationHistory = List.of(messages);
+    _saveConversation();
+  }
+
   /// Clear conversation history
   void clearHistory() {
     _conversationHistory.clear();
