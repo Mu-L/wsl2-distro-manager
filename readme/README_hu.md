@@ -107,8 +107,10 @@
 - [x] Hozz létre macOS vendéggépeket helyreállítási képfájlból (Apple Silicon)
 - [x] Indítsd, állítsd le, klónozd, exportáld/importáld és sablonozd a virtuális gépeket, akárcsak a disztribúciókat
 - [x] Futtass parancsokat a virtuális gépeken belül automatikusan beállított SSH-n (cloud-init) keresztül, a grafikus felületről, az MI-csevegésből vagy MCP-kliensekből
+- [x] Terminál bármelyik virtuális géphez a saját sorából: SSH-munkamenet a Linux vagy macOS vendégben, illetve a soros konzol, ha egy Linux vendégen nincs mihez csatlakozni
 - [x] A saját `~/.ssh` kulcsod minden Linux virtuális gépben engedélyezve lesz (és létrejön, ha nincs), így a sima `ssh felhasznalo@vm-ip` is működik
 - [x] Minden virtuális gép kap egy bejelentkezési jelszót, amelyet a sorából olvashatsz vissza, hogy a gép saját képernyőjén is be tudj lépni
+- [x] Ugyanabban a sorban beállíthatod, melyik fiókkal lép be minden SSH-útvonal — a macOS vendég nevét a beállítóasszisztensbe írod, ahol az alkalmazás nem látja
 - [x] Fordítás a `scripts/build_macos.sh` paranccsal — becsomagolja az aláírt `vmctl` segédprogramot
 
 **Pro** *(egyszeri vásárlás: Microsoft Store Windowson, licenckulcs a [wslmanager.com/buy](https://wslmanager.com/buy/) oldalról macOS-en és a Store-on kívüli telepítésekhez — sosem előfizetés)*

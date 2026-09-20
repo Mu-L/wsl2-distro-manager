@@ -105,8 +105,10 @@
 - [x] 從還原映像檔建立 macOS 客體虛擬機器（Apple Silicon）
 - [x] 像管理發行版一樣啟動、停止、複製、匯出／匯入虛擬機器並存成範本
 - [x] 透過自動佈建的 SSH（cloud-init）在虛擬機器內執行指令，可來自圖形介面、AI 聊天或 MCP 用戶端
+- [x] 在清單列中為任一虛擬機器開啟終端機：Linux 與 macOS 客體都走 SSH 工作階段，Linux 上無法連線時才退回序列主控台
 - [x] 你自己的 `~/.ssh` 金鑰會被授權到每一台 Linux 虛擬機器（若你沒有則替你建立），所以單純執行 `ssh user@vm-ip` 也可以
 - [x] 每台虛擬機器都有一組登入密碼，可在該列中讀回，用於在虛擬機器本身的畫面上登入
+- [x] 可在同一列設定所有 SSH 方式登入時使用的帳戶 —— macOS 客體的使用者名稱在設定輔助程式中輸入，應用程式無從得知
 - [x] 以 `scripts/build_macos.sh` 建置 —— 會封裝已簽署的 `vmctl` 協助程式
 
 **Pro** *（一次性購買：Windows 上透過 Microsoft Store，macOS 與非商店安裝則於 [wslmanager.com/buy](https://wslmanager.com/buy/) 取得授權金鑰 —— 絕非訂閱制）*

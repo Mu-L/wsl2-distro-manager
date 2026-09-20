@@ -227,4 +227,109 @@ void main() {
     expect(answers, [true]);
     expect(callsFor('exec').single, containsAll(['--user', 'dev']));
   });
+
+  /// What the snippet itself then signs in as. The guard can change it —
+  /// it pins the account that took the key — and the caller read its own
+  /// value before the dialog ever opened (bostrot/ai-tasks#101).
+  group('the account a run uses after the guard', () {
+    test('is the pinned one when the guard wrote one', () async {
+      await prefs.setString('StartUser_alpine_2', 'erict');
+      expect(guestRunUser('alpine_2', null), 'erict');
+      expect(guestRunUser('alpine_2', 'user'), 'erict');
+    });
+
+    test('is what the caller had when nothing is pinned', () {
+      expect(guestRunUser('alpine_2', 'dev'), 'dev');
+    });
+
+    test('stays null rather than becoming an empty account', () {
+      // WSL would sign in with `-u ''`; null is what means "your default".
+      expect(guestRunUser('alpine_2', null), isNull);
+    });
+  });
+
+  /// A macOS guest has no root to fall back on — sshd refuses it outright —
+  /// and no settings dialog either, so "set the right account" was advice
+  /// with nowhere to follow it (bostrot/ai-tasks#101).
+  group('a macOS guest', () {
+    const macos = '{"vms":[{"name":"alpine_2","state":"running","os":"macos",'
+        '"user":"user","ip":"192.168.64.5"}]}';
+
+    testWidgets('is probed as its own account rather than as root',
+        (tester) async {
+      shell.responses['list'] = macos;
+      final answers = <bool?>[];
+      await pump(tester, answers);
+      await tester.tap(find.text('run'));
+      await tester.pumpAndSettle();
+
+      expect(answers, [true]);
+      expect(callsFor('exec').single, containsAll(['--user', 'user']));
+    });
+
+    testWidgets(
+        'the account that took the key is pinned when the placeholder is '
+        'still refused', (tester) async {
+      shell.responses['list'] = macos;
+      // Probes: `user` denied, `user` denied again after the install, then
+      // `erict` — the account that just signed in — answers.
+      shell.exitCodeQueue['exec'] = [255, 255, 0];
+      shell.errors['exec'] = _denied;
+      shell.responses['authorize'] =
+          '{"authorized":"alpine_2","root":false,"user":"erict"}';
+      final answers = <bool?>[];
+      await pump(tester, answers);
+      await tester.tap(find.text('run'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+          find.byKey(const ValueKey('test-guest-access-user')), 'erict');
+      await tester.enterText(
+          find.byKey(const ValueKey('test-guest-access-password')), 'hunter2');
+      await tester.tap(find.byKey(const ValueKey('test-guest-access-submit')));
+      await tester.pumpAndSettle();
+
+      // The run goes ahead, and every later one signs in as that account.
+      expect(answers, [true]);
+      expect(prefs.getString('StartUser_alpine_2'), 'erict');
+      expect(notices.last, contains('guestaccessadopted-text'));
+      expect(callsFor('exec').last, containsAll(['--user', 'erict']));
+    });
+
+    testWidgets('an account that does not answer either is not pinned',
+        (tester) async {
+      shell.responses['list'] = macos;
+      shell.exitCodes['exec'] = 255;
+      shell.errors['exec'] = _denied;
+      shell.responses['authorize'] =
+          '{"authorized":"alpine_2","root":false,"user":"erict"}';
+      final answers = <bool?>[];
+      await pump(tester, answers);
+      await tester.tap(find.text('run'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+          find.byKey(const ValueKey('test-guest-access-user')), 'erict');
+      await tester.enterText(
+          find.byKey(const ValueKey('test-guest-access-password')), 'hunter2');
+      await tester.tap(find.byKey(const ValueKey('test-guest-access-submit')));
+      await tester.pumpAndSettle();
+
+      expect(answers, [false]);
+      expect(prefs.getString('StartUser_alpine_2'), isNull);
+      expect(notices.last, contains('guestaccessstilldenied-text'));
+    });
+
+    testWidgets('a pinned account is what the guest is probed as',
+        (tester) async {
+      shell.responses['list'] = macos;
+      await prefs.setString('StartUser_alpine_2', 'erict');
+      final answers = <bool?>[];
+      await pump(tester, answers);
+      await tester.tap(find.text('run'));
+      await tester.pumpAndSettle();
+
+      expect(callsFor('exec').single, containsAll(['--user', 'erict']));
+    });
+  });
 }

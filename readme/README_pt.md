@@ -107,8 +107,10 @@
 - [x] Crie VMs convidadas de macOS a partir de uma imagem de restauração (Apple Silicon)
 - [x] Inicie, pare, clone, exporte/importe e transforme VMs em modelos, como faz com as distros
 - [x] Execute comandos dentro das VMs por SSH provisionado automaticamente (cloud-init), pela interface, pelo chat de IA ou por clientes MCP
+- [x] Um terminal para qualquer VM a partir da sua linha: uma sessão SSH no convidado Linux ou macOS, e o console serial quando um convidado Linux não tem a que se conectar
 - [x] Sua própria chave de `~/.ssh` é autorizada em toda VM Linux (e criada, se você não tiver nenhuma), então um simples `ssh usuario@ip-da-vm` também funciona
 - [x] Cada VM recebe uma senha de login que você pode consultar na linha dela, para entrar na tela da própria VM
+- [x] Defina na mesma linha a conta com que cada caminho SSH entra: o nome de um convidado macOS é digitado no Assistente de Configuração, onde o app não consegue vê-lo
 - [x] Compile com `scripts/build_macos.sh` — ele inclui o auxiliar `vmctl` assinado
 
 **Pro** *(compra única: Microsoft Store no Windows, chave de licença em [wslmanager.com/buy](https://wslmanager.com/buy/) no macOS e para instalações fora da Store — nunca assinatura)*

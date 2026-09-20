@@ -70,7 +70,7 @@ class QuickPageState extends State<QuickPage> {
               final env = await askSnippetEnv(context, action);
               if (env == null) return;
               api.runCommands(instance, action.content.split('\n'),
-                  user: user, env: env);
+                  user: guestRunUser(instance, user), env: env);
             },
           ),
       ],

@@ -149,5 +149,89 @@ void main() {
     expect(find.byKey(const ValueKey('test-vm-credentials-error')),
         findsOneWidget);
     expect(find.textContaining('No VM named'), findsOneWidget);
+    // Nothing loaded, so there is no account to save either — saving the
+    // empty box would clear a pin the user came here to read
+    // (bostrot/ai-tasks#101).
+    final save = tester.widget<FilledButton>(
+        find.byKey(const ValueKey('test-vm-credentials-save')));
+    expect(save.onPressed, isNull);
+  });
+
+  /// On a macOS guest `vmctl create` never learns the account typed into
+  /// Setup Assistant and keeps its placeholder, so every SSH path signs in
+  /// as a user that does not exist. This box is where that is corrected
+  /// (bostrot/ai-tasks#101).
+  group('the account', () {
+    testWidgets('is prefilled with the pinned one, not the helper\'s guess',
+        (tester) async {
+      await prefs.setString('StartUser_ubuntu', 'erict');
+      answerWith({
+        'user': 'user',
+        'sshKey': '/store/id_ed25519',
+        'appliedOnNextBoot': false,
+      });
+      await pump(tester);
+
+      final box = tester.widget<TextBox>(
+          find.byKey(const ValueKey('test-vm-credentials-user')));
+      expect(box.controller!.text, 'erict');
+    });
+
+    testWidgets('is pinned for the instance when it is corrected',
+        (tester) async {
+      answerWith({
+        'user': 'user',
+        'sshKey': '/store/id_ed25519',
+        'appliedOnNextBoot': false,
+      });
+      await pump(tester);
+
+      await tester.enterText(
+          find.byKey(const ValueKey('test-vm-credentials-user')), 'erict');
+      await tester.tap(find.byKey(const ValueKey('test-vm-credentials-save')));
+      await tester.pumpAndSettle();
+
+      expect(prefs.getString('StartUser_ubuntu'), 'erict');
+      expect(notices.last, contains('vmloginusersaved-text'));
+      // Saved and gone: the dialog is a setting, not a session.
+      expect(find.byType(VmCredentialsDialog), findsNothing);
+    });
+
+    testWidgets('typed back to the helper\'s own answer, the pin is dropped',
+        (tester) async {
+      await prefs.setString('StartUser_ubuntu', 'erict');
+      answerWith({
+        'user': 'user',
+        'sshKey': '/store/id_ed25519',
+        'appliedOnNextBoot': false,
+      });
+      await pump(tester);
+
+      await tester.enterText(
+          find.byKey(const ValueKey('test-vm-credentials-user')), 'user');
+      await tester.tap(find.byKey(const ValueKey('test-vm-credentials-save')));
+      await tester.pumpAndSettle();
+
+      // Not frozen into a setting of its own: a VM whose config is right
+      // keeps tracking it.
+      expect(prefs.getString('StartUser_ubuntu'), isNull);
+    });
+
+    testWidgets('is left alone when the dialog is closed', (tester) async {
+      await prefs.setString('StartUser_ubuntu', 'erict');
+      answerWith({
+        'user': 'user',
+        'sshKey': '/store/id_ed25519',
+        'appliedOnNextBoot': false,
+      });
+      await pump(tester);
+
+      await tester.enterText(
+          find.byKey(const ValueKey('test-vm-credentials-user')), 'typo');
+      await tester.tap(find.byKey(const ValueKey('test-dialog-cancel')));
+      await tester.pumpAndSettle();
+
+      expect(prefs.getString('StartUser_ubuntu'), 'erict');
+    });
   });
 }

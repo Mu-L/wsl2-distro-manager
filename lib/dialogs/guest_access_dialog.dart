@@ -26,8 +26,12 @@ Future<bool> ensureGuestAccess(
   String? user,
 }) async {
   if (api is! AppleVmApi) return true;
-  // The same default runCommands applies when no start user is set.
-  final target = (user == null || user.isEmpty) ? 'root' : user;
+  // The same account runCommands would use when the caller names none:
+  // root on a Linux guest, the instance's own account on a macOS one, where
+  // root is refused by sshd no matter what key it carries.
+  final target = (user == null || user.trim().isEmpty)
+      ? await api.execUser(instance)
+      : user.trim();
 
   var probe = await api.probeGuestAccess(instance, user: target);
   if (probe.ok) return true;
@@ -58,6 +62,26 @@ Future<bool> ensureGuestAccess(
         severity: InfoBarSeverity.success);
     return true;
   }
+
+  // The account the user just signed in with answers even though the target
+  // does not — a macOS guest asked for as `user`, a Linux one with
+  // `PermitRootLogin no`. Both used to end here with a message telling the
+  // user to go and set that account as the instance's user, which is a
+  // setting VMs had no dialog for (bostrot/ai-tasks#101). It is written down
+  // for them instead, and said out loud, because it changes what every later
+  // snippet run signs in as.
+  if (authorized.user.trim().isNotEmpty && authorized.user != target) {
+    if ((await api.probeGuestAccess(instance, user: authorized.user)).ok) {
+      await AppleVmApi.setPreferredUser(instance, authorized.user);
+      Notify.message(
+          'guestaccessadopted-text'
+              .i18n([distroLabel(instance), authorized.user, target]),
+          severity: InfoBarSeverity.success,
+          duration: const Duration(seconds: 15));
+      return true;
+    }
+  }
+
   Notify.message(
       'guestaccessstilldenied-text'
           .i18n([target, distroLabel(instance), authorized.user]),
@@ -66,12 +90,27 @@ Future<bool> ensureGuestAccess(
   return false;
 }
 
+/// The account to run as now that [ensureGuestAccess] has said yes.
+///
+/// Read again rather than reused: the guard may have pinned the account that
+/// actually took the key, and running as the one the guest just refused would
+/// hand the user a Terminal window full of "Permission denied"
+/// (bostrot/ai-tasks#101).
+///
+/// Null stays null. A backend reads its own default out of it — `root` on
+/// both of them — and an empty string is not that: WSL would sign in with
+/// `-u ''`.
+String? guestRunUser(String instance, String? user) {
+  final pinned = AppleVmApi.preferredUser(instance);
+  return pinned.isEmpty ? user : pinned;
+}
+
 /// Which account to prefill: the snippet's own user when it is not root
 /// (root cannot sign in with a password on most guests — sshd's
 /// `PermitRootLogin prohibit-password`), else the VM's configured user.
 String _suggestedLogin(String instance, String target) {
   if (target != 'root') return target;
-  return prefs.getString('StartUser_$instance') ?? '';
+  return AppleVmApi.preferredUser(instance);
 }
 
 /// Asks for a guest account and password, installs the app's SSH key with

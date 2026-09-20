@@ -140,6 +140,19 @@ class AppleVmException implements Exception {
   String toString() => message;
 }
 
+/// The guest answered, and refused the app's key for [user].
+///
+/// Told apart from every other failure because it is the one a caller can
+/// repair: the guest-access dialog signs in once with a password and installs
+/// the key. A macOS guest raises it from its terminal, where there is no
+/// console to fall back on (bostrot/ai-tasks#101).
+class GuestKeyRefusedException extends AppleVmException {
+  GuestKeyRefusedException(super.message, {required this.user});
+
+  /// The account the key was refused for — the one to offer to repair.
+  final String user;
+}
+
 /// What GNU tar says about a file system that moved under it while it was
 /// archiving, one line each. None of them means the archive is bad — the
 /// member in question is a moment older or newer than its neighbours, which
@@ -281,13 +294,16 @@ class AppleVmApi extends VmBackend {
     Duration? rootfsTransferTimeout,
     Duration? guestReadyTimeout,
     Duration? guestReadyPollInterval,
+    Duration? macosTerminalTimeout,
   })  : shell = shell ?? ProcessShell(),
         earlyExitProbeDelay = earlyExitProbeDelay ?? _defaultEarlyExitProbeDelay,
         rootfsTransferTimeout =
             rootfsTransferTimeout ?? const Duration(hours: 4),
         guestReadyTimeout = guestReadyTimeout ?? const Duration(minutes: 5),
         guestReadyPollInterval =
-            guestReadyPollInterval ?? const Duration(seconds: 5);
+            guestReadyPollInterval ?? const Duration(seconds: 5),
+        macosTerminalTimeout =
+            macosTerminalTimeout ?? const Duration(seconds: 90);
 
   @override
   String get backendId => 'applevirt';
@@ -799,6 +815,14 @@ class AppleVmApi extends VmBackend {
     // runCmds. The script travels base64-encoded so nothing in it has to be
     // escaped through the host shell, ssh's re-parse, or the guest shell,
     // and the environment the user typed rides along inside it.
+    //
+    // A caller that names no account gets the instance's own — `root` on a
+    // Linux guest as before, the configured account on a macOS one, where
+    // root cannot sign in at all and every snippet run as root died at the
+    // guest's own door (bostrot/ai-tasks#101).
+    final account = (user ?? '').trim().isEmpty
+        ? await execUser(instance)
+        : user!.trim();
     final script = [...SnippetEnv.exportLines(env), ...commands].join('\n');
     final payload = base64.encode(utf8.encode(script));
     // One argument after `--`: the guest shell decodes and runs the snippet.
@@ -806,7 +830,7 @@ class AppleVmApi extends VmBackend {
     final runner = '#!/bin/bash\n'
         'echo "Running snippet in $instance…"\n'
         '"${helperPath()}" --store "$storeDir" exec '
-        '--name "$instance" --user "${user ?? 'root'}" -- ${_shSingleQuote(remote)}\n'
+        '--name "$instance" --user "$account" -- ${_shSingleQuote(remote)}\n'
         'echo\n'
         'read -n1 -r -p "Done. Press any key to close…" _\n';
     final scriptPath = p.join(storeDir, instance, 'run', 'snippet.command');
@@ -1083,10 +1107,18 @@ class AppleVmApi extends VmBackend {
   /// headless first when it is not running — a VM driven entirely from a
   /// terminal, no display window involved.
   ///
+  /// A macOS guest has no serial console to attach to, so it gets the SSH
+  /// terminal instead ([openMacosTerminal]); on that guest this button and
+  /// the terminal button mean the same thing.
+  ///
   /// Terminal is launched through a `.command` file rather than
   /// AppleScript: `open` needs no automation permission prompt.
   Future<void> openConsole(String distribution) async {
     final vm = await vmInfo(distribution);
+    if (vm != null && vm.os == 'macos') {
+      await openMacosTerminal(distribution, vm);
+      return;
+    }
     if (vm == null || !vm.running) {
       await startHeadless(distribution);
     }
@@ -1119,11 +1151,18 @@ class AppleVmApi extends VmBackend {
   /// A guest with no IP is sent straight to the console rather than probed:
   /// the probe would spend `vmctl`'s whole 20s lease wait, then ssh's connect
   /// timeout, to learn what the empty address already said.
+  ///
+  /// A macOS guest has no console behind it at all, so it never takes this
+  /// route — see [openMacosTerminal].
   Future<void> openTerminal(String distribution) async {
     final vm = await vmInfo(distribution);
+    if (vm != null && vm.os == 'macos') {
+      await openMacosTerminal(distribution, vm);
+      return;
+    }
     final ip = vm?.ip ?? '';
-    if (vm != null && vm.running && vm.os == 'linux' && ip.isNotEmpty) {
-      final user = vm.user.trim().isEmpty ? 'root' : vm.user.trim();
+    if (vm != null && vm.running && ip.isNotEmpty) {
+      final user = terminalUser(distribution, vm);
       if ((await probeGuestAccess(distribution, user: user)).ok) {
         // Before the session, not after: the snippet has to be in place for
         // the login shell ssh is about to start to read it.
@@ -1134,6 +1173,119 @@ class AppleVmApi extends VmBackend {
     }
     await openConsole(distribution);
   }
+
+  /// The terminal for a macOS guest: SSH, and nothing else.
+  ///
+  /// Apple's Virtualization framework gives a macOS guest no serial device,
+  /// so the console the Linux path falls back on does not exist here. The
+  /// button still opened one, and the user was handed a Terminal window that
+  /// said "Serial console is only available for Linux guests." and stopped
+  /// there (bostrot/ai-tasks#101). The guest is reached the way a snippet
+  /// reaches it instead, and when it cannot be, the reason is raised in the
+  /// app rather than left in a window the app cannot read back.
+  ///
+  /// A stopped guest is started headless and given [macosTerminalTimeout] to
+  /// come up: macOS takes the better part of a minute to reach its login
+  /// window, and sshd with it, so a single probe would be answering for the
+  /// boot rather than for the guest. One that is already running is probed
+  /// once — the answer is there now or not at all.
+  ///
+  /// No guest greeting: [GuestGreeting] is a `/etc/profile.d` snippet, and
+  /// macOS neither reads that directory nor lets a non-root account write it.
+  Future<void> openMacosTerminal(String instance, AppleVmInfo vm) async {
+    final user = terminalUser(instance, vm);
+    if (!vm.running) {
+      await startHeadless(instance);
+    }
+    // Counted from here, not from before the start: the wait is the guest's
+    // to spend, and the helper's own start has already had its time.
+    final deadline =
+        DateTime.now().add(vm.running ? Duration.zero : macosTerminalTimeout);
+    while (true) {
+      final probe = await probeGuestAccess(instance, user: user);
+      if (probe.ok) {
+        await openShell(instance, user: user);
+        return;
+      }
+      if (!DateTime.now().isBefore(deadline)) {
+        if (probe.denied) {
+          throw GuestKeyRefusedException(
+              'vmmacosterminaldenied-text'.i18n([distroLabel(instance), user]),
+              user: user);
+        }
+        throw AppleVmException('vmmacosterminalunreachable-text'
+            .i18n([distroLabel(instance), probe.message]));
+      }
+      await Future.delayed(guestReadyPollInterval);
+    }
+  }
+
+  /// The account a terminal on [vm] signs in as.
+  ///
+  /// A Linux guest's account is cloud-init's, and `vmctl`'s config is the
+  /// first-hand record of it. A macOS guest's account is whatever was typed
+  /// into Setup Assistant on the VM's own screen: `vmctl create` never sees
+  /// it and keeps the placeholder it was given, so the instance's own user
+  /// setting — the one field where that name can be written down — wins
+  /// there (bostrot/ai-tasks#101).
+  String terminalUser(String instance, AppleVmInfo vm) {
+    final configured = vm.user.trim();
+    if (vm.os != 'macos') {
+      return configured.isEmpty ? 'root' : configured;
+    }
+    final preferred = preferredUser(instance);
+    if (preferred.isNotEmpty) return preferred;
+    // `vmctl create --os macos` defaults to this one; root is never right on
+    // a macOS guest, where it cannot sign in over SSH at all.
+    return configured.isEmpty ? 'user' : configured;
+  }
+
+  /// The account an unattended run in [instance] — a snippet, a quick action,
+  /// the key check in front of them — signs in as when the caller names none.
+  ///
+  /// `root` on a Linux guest, which is what it has always been: cloud-init
+  /// puts the app's key in root's `authorized_keys` too, and a snippet that
+  /// installs packages wants to be root. A macOS guest has no such fallback —
+  /// sshd there refuses root outright — so it resolves the way a terminal
+  /// does, through the instance's own account setting
+  /// (bostrot/ai-tasks#101).
+  ///
+  /// A guest `vmctl` cannot describe right now falls back to `root` rather
+  /// than failing: the probe that follows says what is wrong far better than
+  /// a resolution error would.
+  Future<String> execUser(String instance) async {
+    final preferred = preferredUser(instance);
+    if (preferred.isNotEmpty) return preferred;
+    AppleVmInfo? vm;
+    try {
+      vm = await vmInfo(instance);
+    } catch (_) {
+      vm = null;
+    }
+    if (vm == null || vm.os != 'macos') return 'root';
+    return terminalUser(instance, vm);
+  }
+
+  /// The account the user pinned for [instance] in its login details, or ''
+  /// when they have pinned none.
+  static String preferredUser(String instance) =>
+      (prefs.getString(startUserPrefKey(instance)) ?? '').trim();
+
+  /// Pin [user] as [instance]'s account, or clear the pin when it is empty.
+  ///
+  /// The same pref a WSL distro's settings dialog writes, so an instance has
+  /// one account setting between the two backends rather than two.
+  static Future<void> setPreferredUser(String instance, String user) async {
+    final value = user.trim();
+    if (value.isEmpty) {
+      await prefs.remove(startUserPrefKey(instance));
+      return;
+    }
+    await prefs.setString(startUserPrefKey(instance), value);
+  }
+
+  /// Where that account is kept.
+  static String startUserPrefKey(String instance) => 'StartUser_$instance';
 
   /// Put the system-summary banner in [instance] if it is not there already.
   ///
@@ -1291,6 +1443,13 @@ class AppleVmApi extends VmBackend {
 
   /// Gap between guest-readiness probes.
   final Duration guestReadyPollInterval;
+
+  /// How long a macOS guest started for a terminal is given to answer SSH.
+  ///
+  /// Shorter than [guestReadyTimeout] on purpose: this one is spent in front
+  /// of a user watching a spinner, and a guest without Remote Login is never
+  /// going to answer. Long enough for a boot, short enough to say so.
+  final Duration macosTerminalTimeout;
 
   /// Tar the *running* guest's root filesystem into [tarPath].
   ///

@@ -319,10 +319,25 @@ class _ListItemState extends State<ListItem> {
 
   /// Terminal.app on the running VM: signed in as its own account over SSH
   /// where that works, its serial console otherwise.
+  ///
+  /// A macOS guest has no serial console behind it (bostrot/ai-tasks#101), so
+  /// a refused key is the end of the road there rather than a fallback. It is
+  /// also the one failure that can be repaired from here: the same dialog a
+  /// snippet run uses installs the key, and the terminal opens after all.
   Future<void> openTerminal() async {
     _setBusy('console');
     try {
-      await (api as AppleVmApi).openTerminal(widget.item);
+      final vmApi = api as AppleVmApi;
+      try {
+        await vmApi.openTerminal(widget.item);
+      } on GuestKeyRefusedException catch (refused) {
+        if (!mounted) return;
+        if (!await ensureGuestAccess(context, api, widget.item,
+            user: refused.user)) {
+          return;
+        }
+        await vmApi.openTerminal(widget.item);
+      }
     } catch (error) {
       Notify.message(
           '${'startfailed-text'.i18n([distroLabel(widget.item)])} $error',
@@ -490,7 +505,7 @@ class Bar extends StatelessWidget {
                     if (env == null) return;
                     api.runCommands(
                         widget.item, quickSettingsContents[i].split('\n'),
-                        user: user, env: env);
+                        user: guestRunUser(widget.item, user), env: env);
                   },
                   text: MouseRegion(
                       cursor: SystemMouseCursors.click,

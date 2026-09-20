@@ -105,8 +105,10 @@
 - [x] 从恢复镜像创建 macOS 客户机虚拟机（Apple Silicon）
 - [x] 像管理发行版一样启动、停止、克隆、导出/导入虚拟机并保存为模板
 - [x] 通过自动配置的 SSH（cloud-init）在虚拟机内执行命令，可来自图形界面、AI 聊天或 MCP 客户端
+- [x] 在列表行里为任意虚拟机打开终端：Linux 与 macOS 客户机都走 SSH 会话，Linux 上无法连接时才退回串行控制台
 - [x] 你自己的 `~/.ssh` 密钥会被授权到每台 Linux 虚拟机（如果没有则替你创建），所以直接 `ssh user@vm-ip` 也能用
 - [x] 每台虚拟机都有一个登录密码，可在其列表行中读取，用于在虚拟机自身的界面上登录
+- [x] 可在同一行设置所有 SSH 方式登录时使用的账户 —— macOS 客户机的用户名在设置助理中输入，应用无从获知
 - [x] 使用 `scripts/build_macos.sh` 构建 —— 会打包签名后的 `vmctl` 助手
 
 **Pro** *（一次性购买：Windows 上通过 Microsoft Store，macOS 及非商店安装则从 [wslmanager.com/buy](https://wslmanager.com/buy/) 获取许可证密钥 —— 绝不是订阅制）*

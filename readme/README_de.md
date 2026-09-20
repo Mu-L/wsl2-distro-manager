@@ -108,8 +108,10 @@
 - [x] macOS-Gast-VMs aus einem Restore-Image erstellen (Apple Silicon)
 - [x] VMs wie Distributionen starten, stoppen, klonen, exportieren/importieren und als Vorlage sichern
 - [x] Befehle in VMs über automatisch eingerichtetes SSH (cloud-init) ausführen — aus der Oberfläche, dem KI-Chat oder von MCP-Clients
+- [x] Ein Terminal zu jeder VM direkt aus ihrer Zeile: eine SSH-Sitzung im Linux- oder macOS-Gast, die serielle Konsole, wenn es bei Linux nichts zum Verbinden gibt
 - [x] Ihr eigener `~/.ssh`-Schlüssel wird in jeder Linux-VM autorisiert (und angelegt, falls Sie keinen haben), sodass auch schlicht `ssh user@vm-ip` funktioniert
 - [x] Jede VM bekommt ein Anmeldekennwort, das Sie in ihrer Zeile nachlesen können, um sich am Bildschirm der VM selbst anzumelden
+- [x] Das Konto, mit dem sich jeder SSH-Weg anmeldet, lässt sich in derselben Zeile festlegen — der Name eines macOS-Gasts wird im Systemassistenten eingegeben, wo die App ihn nicht sieht
 - [x] Bauen mit `scripts/build_macos.sh` — bündelt den signierten `vmctl`-Helfer
 
 **Pro** *(einmaliger Kauf: Microsoft Store unter Windows, Lizenzschlüssel von [wslmanager.com/buy](https://wslmanager.com/buy/) unter macOS und für Installationen außerhalb des Stores — niemals ein Abonnement)*

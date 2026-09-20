@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fluent_ui/fluent_ui.dart' show InfoBarSeverity;
+import 'package:fluent_ui/fluent_ui.dart' show InfoBarSeverity, Locale;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:localization/localization.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wsl2distromanager/api/apple/apple_vm_api.dart';
@@ -43,6 +44,7 @@ void main() {
       // A test may not sit through a guest boot: one probe, no sleep.
       guestReadyTimeout: Duration.zero,
       guestReadyPollInterval: Duration.zero,
+      macosTerminalTimeout: Duration.zero,
     );
   });
 
@@ -708,17 +710,6 @@ void main() {
       expect(File(openCall.last).readAsStringSync(), contains('console'));
     });
 
-    test('a macOS guest has no SSH seed, so it goes straight to the console',
-        () async {
-      shell.responses['list'] =
-          '{"vms":[{"name":"sequoia","state":"running","os":"macos",'
-          '"user":"user","ip":"192.168.64.5"}]}';
-      await api.openTerminal('sequoia');
-      expect(shell.calls.where((c) => c.contains('exec')), isEmpty);
-      expect(shell.calls.lastWhere((c) => c.first == 'start:open').last,
-          endsWith('console.command'));
-    });
-
     test('a guest with no lease yet is not probed at all', () async {
       // Without an address the probe can only spend vmctl's 20s lease wait
       // and ssh's connect timeout to learn what the empty `ip` already said.
@@ -728,6 +719,256 @@ void main() {
       expect(shell.calls.where((c) => c.contains('exec')), isEmpty);
       expect(shell.calls.lastWhere((c) => c.first == 'start:open').last,
           endsWith('console.command'));
+    });
+  });
+
+  /// A macOS guest has no serial device at all, so the console the Linux
+  /// path falls back on does not exist for it — the terminal button used to
+  /// hand the user a Terminal window saying "Serial console is only
+  /// available for Linux guests." (bostrot/ai-tasks#101).
+  group('a macOS guest terminal', () {
+    const running = '{"vms":[{"name":"sequoia","state":"running","os":"macos",'
+        '"user":"user","ip":"192.168.64.5"}]}';
+
+    // The real English strings, so the assertions below are about what the
+    // user is told and not about a key name.
+    setUp(() async {
+      MapLocalization.delegate.translations = {
+        const Locale('en'): (json.decode(
+                File(p.join('lib', 'i18n', 'en.json')).readAsStringSync())
+            as Map)
+            .cast<String, dynamic>(),
+      };
+      await MapLocalization.delegate.load(const Locale('en'));
+    });
+
+    tearDown(() async {
+      MapLocalization.delegate.translations = {};
+      await MapLocalization.delegate.load(const Locale('en'));
+    });
+
+    List<String> openedScript() =>
+        shell.calls.lastWhere((c) => c.first == 'start:open');
+
+    test('a running guest gets an SSH shell, never the console', () async {
+      shell.responses['list'] = running;
+      await api.openTerminal('sequoia');
+
+      final probe = shell.calls.firstWhere((c) => c.contains('exec'));
+      expect(probe, containsAll(['--user', 'user', 'true']));
+      expect(openedScript().last, endsWith('shell.command'));
+      expect(File(openedScript().last).readAsStringSync(),
+          contains("'shell' '--name' 'sequoia' '--user' 'user'"));
+      expect(shell.calls.where((c) => c.contains('console')), isEmpty);
+    });
+
+    test("the instance's own user setting names the Setup Assistant account",
+        () async {
+      // `vmctl create --os macos` never learns the account typed into Setup
+      // Assistant and keeps its placeholder, so the instance's user setting
+      // is the only place that name can come from.
+      await prefs.setString('StartUser_sequoia', 'eric');
+      shell.responses['list'] = running;
+      await api.openTerminal('sequoia');
+
+      expect(shell.calls.firstWhere((c) => c.contains('exec')),
+          containsAll(['--user', 'eric']));
+      expect(File(openedScript().last).readAsStringSync(),
+          contains("'--user' 'eric'"));
+    });
+
+    test('the console button opens the same SSH shell', () async {
+      shell.responses['list'] = running;
+      await api.openConsole('sequoia');
+      expect(openedScript().last, endsWith('shell.command'));
+    });
+
+    test('a refused key is reported in the app, not in a Terminal window',
+        () async {
+      shell.responses['list'] = running;
+      shell.exitCodes['exec'] = 255;
+      shell.errors['exec'] = 'user@192.168.64.5: Permission denied (publickey).';
+
+      await expectLater(
+          api.openTerminal('sequoia'),
+          throwsA(isA<GuestKeyRefusedException>()
+              // The account to offer the repair for travels with it.
+              .having((e) => e.user, 'user', 'user')
+              .having((e) => e.message, 'message', contains('Remote Login'))));
+      // Nothing was opened at all: a console window here would only carry
+      // the helper's "Linux guests" refusal.
+      expect(shell.calls.where((c) => c.first == 'start:open'), isEmpty);
+    });
+
+    test('an unreachable guest reports why instead of opening a console',
+        () async {
+      shell.responses['list'] = running;
+      shell.exitCodes['exec'] = 255;
+      shell.errors['exec'] = 'ssh: connect to host 192.168.64.5 port 22: '
+          'Connection refused';
+
+      await expectLater(
+          api.openTerminal('sequoia'),
+          throwsA(allOf(
+            // Not the refusal the key dialog can repair: no sshd answered at
+            // all, so the row must not offer to install a key.
+            isNot(isA<GuestKeyRefusedException>()),
+            predicate((e) =>
+                e.toString().contains('Connection refused') &&
+                e.toString().contains('Remote Login')),
+          )));
+      expect(shell.calls.where((c) => c.first == 'start:open'), isEmpty);
+    });
+
+    test('a stopped guest is started headless and waited for', () async {
+      final waiting = AppleVmApi(
+        shell: shell,
+        helperPathOverride: '/fake/vmctl',
+        storeDirOverride: tempStore.path,
+        earlyExitProbeDelay: Duration.zero,
+        guestReadyPollInterval: Duration.zero,
+        // Long enough to poll, short enough for a test: the deadline is only
+        // consulted after a probe has answered.
+        macosTerminalTimeout: const Duration(minutes: 1),
+      );
+      shell.responseQueue['list'] = [
+        '{"vms":[{"name":"sequoia","state":"stopped","os":"macos",'
+            '"user":"user"}]}',
+      ];
+      // Once started it stays up, which is what the early-exit probe after
+      // a headless start reads.
+      shell.responses['list'] = running;
+      shell.responses['start'] = '{"started":"sequoia"}';
+      // sshd comes up a few seconds after the boot does.
+      shell.exitCodeQueue['exec'] = [255, 255, 0];
+      shell.errors['exec'] = 'ssh: connect to host: Connection refused';
+
+      await waiting.openMacosTerminal(
+          'sequoia', (await waiting.listVms()).single);
+
+      final startCall = shell.calls
+          .firstWhere((c) => c.contains('start') && c.first != 'start:open');
+      expect(startCall, isNot(contains('--gui')));
+      expect(shell.calls.where((c) => c.contains('exec')), hasLength(3));
+      expect(openedScript().last, endsWith('shell.command'));
+    });
+
+    test('a guest that never answers gives up with words', () async {
+      shell.responseQueue['list'] = [
+        '{"vms":[{"name":"sequoia","state":"stopped","os":"macos",'
+            '"user":"user"}]}',
+      ];
+      shell.responses['list'] = running;
+      shell.responses['start'] = '{"started":"sequoia"}';
+      shell.exitCodes['exec'] = 255;
+      shell.errors['exec'] = 'ssh: connect to host: Connection refused';
+
+      // The api under test has a zero-length wait, so the first probe after
+      // the start is also the last.
+      await expectLater(api.openConsole('sequoia'),
+          throwsA(predicate((e) => e.toString().contains('Remote Login'))));
+      expect(shell.calls.where((c) => c.first == 'start:open'), isEmpty);
+    });
+
+    test('no guest greeting is written into a macOS guest', () async {
+      // The greeting is an /etc/profile.d snippet; macOS reads no such
+      // directory and would not let the account write it either.
+      shell.responses['list'] = running;
+      await api.openTerminal('sequoia');
+      expect(
+          shell.calls.where(
+              (c) => c.contains('exec') && c.last.contains(GuestGreeting.path)),
+          isEmpty);
+      expect(prefs.getInt(GuestGreeting.prefKey('sequoia')), isNull);
+    });
+  });
+
+  /// Which account a run nobody named an account for signs in as. Root on a
+  /// Linux guest, as it has always been; on a macOS guest root cannot sign in
+  /// over SSH at all, and every snippet run as root died at the guest's door
+  /// (bostrot/ai-tasks#101).
+  group('the account an unattended run uses', () {
+    const linux = '{"vms":[{"name":"ubuntu","state":"running","os":"linux",'
+        '"user":"eric","ip":"192.168.64.4"}]}';
+    const macos = '{"vms":[{"name":"sequoia","state":"running","os":"macos",'
+        '"user":"user","ip":"192.168.64.5"}]}';
+
+    test('a Linux guest still runs as root', () async {
+      shell.responses['list'] = linux;
+      expect(await api.execUser('ubuntu'), 'root');
+    });
+
+    test("a macOS guest uses vmctl's account rather than root", () async {
+      shell.responses['list'] = macos;
+      expect(await api.execUser('sequoia'), 'user');
+    });
+
+    test('the pinned account wins on either guest', () async {
+      await AppleVmApi.setPreferredUser('sequoia', 'erict');
+      await AppleVmApi.setPreferredUser('ubuntu', 'dev');
+      shell.responses['list'] = macos;
+      expect(await api.execUser('sequoia'), 'erict');
+      shell.responses['list'] = linux;
+      expect(await api.execUser('ubuntu'), 'dev');
+      // A pinned account is an answer on its own: the helper is not asked
+      // what the guest thinks its account is.
+      expect(shell.calls.where((c) => c.contains('list')), isEmpty);
+    });
+
+    test('a guest vmctl cannot describe falls back to root', () async {
+      shell.exitCodes['list'] = 1;
+      shell.errors['list'] = 'No such VM.';
+      expect(await api.execUser('ghost'), 'root');
+    });
+
+    test('an empty pin is cleared rather than stored', () async {
+      await AppleVmApi.setPreferredUser('sequoia', 'erict');
+      await AppleVmApi.setPreferredUser('sequoia', '   ');
+      expect(prefs.getString('StartUser_sequoia'), isNull);
+      expect(AppleVmApi.preferredUser('sequoia'), isEmpty);
+    });
+
+    test('a snippet with no start user reaches a macOS guest as its account',
+        () async {
+      shell.responses['list'] = macos;
+      await api.runCommands('sequoia', ['echo hi']);
+      final script = File(shell.calls
+              .lastWhere((c) => c.first == 'start:open')
+              .last)
+          .readAsStringSync();
+      expect(script, contains('--user "user"'));
+      expect(script, isNot(contains('--user "root"')));
+    });
+
+    test('the pinned account is what a snippet signs in as', () async {
+      await AppleVmApi.setPreferredUser('sequoia', 'erict');
+      shell.responses['list'] = macos;
+      await api.runCommands('sequoia', ['echo hi']);
+      final script = File(shell.calls
+              .lastWhere((c) => c.first == 'start:open')
+              .last)
+          .readAsStringSync();
+      expect(script, contains('--user "erict"'));
+    });
+
+    test('a snippet in a Linux guest is unchanged', () async {
+      shell.responses['list'] = linux;
+      await api.runCommands('ubuntu', ['echo hi']);
+      final script = File(shell.calls
+              .lastWhere((c) => c.first == 'start:open')
+              .last)
+          .readAsStringSync();
+      expect(script, contains('--user "root"'));
+    });
+
+    test('an account the caller names is used as given', () async {
+      shell.responses['list'] = macos;
+      await api.runCommands('sequoia', ['echo hi'], user: ' dev ');
+      final script = File(shell.calls
+              .lastWhere((c) => c.first == 'start:open')
+              .last)
+          .readAsStringSync();
+      expect(script, contains('--user "dev"'));
     });
   });
 

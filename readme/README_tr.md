@@ -107,8 +107,10 @@
 - [x] Bir kurtarma imajından macOS konuk sanal makineleri oluşturun (Apple Silicon)
 - [x] Sanal makineleri dağıtımlar gibi başlatın, durdurun, klonlayın, dışa/içe aktarın ve şablonlaştırın
 - [x] Otomatik hazırlanan SSH (cloud-init) üzerinden sanal makinelerin içinde komut çalıştırın; arayüzden, yapay zekâ sohbetinden veya MCP istemcilerinden
+- [x] Her sanal makineye kendi satırından bir terminal: Linux veya macOS konuğunda bir SSH oturumu, Linux'ta bağlanacak bir şey yoksa seri konsol
 - [x] Kendi `~/.ssh` anahtarınız her Linux sanal makinesinde yetkilendirilir (yoksa oluşturulur), böylece düz `ssh kullanici@vm-ip` de çalışır
 - [x] Her sanal makine, satırından okuyabileceğiniz bir oturum açma parolası alır; makinenin kendi ekranından giriş yapmak için
+- [x] Her SSH yolunun hangi hesapla oturum açacağını aynı satırdan ayarlayın — macOS konuğunun adı, uygulamanın göremediği Kurulum Yardımcısı'na yazılır
 - [x] `scripts/build_macos.sh` ile derleyin — imzalı `vmctl` yardımcısını paketler
 
 **Pro** *(tek seferlik satın alma: Windows'ta Microsoft Store, macOS ve Store dışı kurulumlar için [wslmanager.com/buy](https://wslmanager.com/buy/) adresinden lisans anahtarı — asla abonelik değil)*
