@@ -11,6 +11,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wsl2distromanager/api/backup_service.dart';
 import 'package:wsl2distromanager/api/cancellation.dart';
@@ -340,8 +341,10 @@ void main() {
       expect(outcome.succeeded, ['Ubuntu 22.04 (work)']);
       expect(backend.imports.single[0], 'Ubuntu 22.04 (work)');
       expect(backend.importedAsVhd.single, false);
+      // p.join, not a literal '/': the service joins with the platform
+      // separator, so this is a backslash on Windows.
       expect(backend.imports.single[2],
-          '${backupDir.path}/Ubuntu_22.04__work_.ext4');
+          path.join(backupDir.path, 'Ubuntu_22.04__work_.ext4'));
     });
 
     test('leaves an instance that already exists here alone', () async {
