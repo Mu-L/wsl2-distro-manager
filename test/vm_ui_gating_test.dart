@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wsl2distromanager/api/ai_service.dart';
 import 'package:wsl2distromanager/api/apple/apple_vm_api.dart';
 import 'package:wsl2distromanager/api/experimental_features.dart';
 import 'package:wsl2distromanager/api/license_manager.dart';
@@ -20,7 +21,11 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
-    SharedPreferences.setMockInitialValues({});
+    // The AI consent gate is answered here for the same reason the
+    // experimental gate is: these assertions are about the *backend* gate,
+    // and the consent gate has its own tests. Undecided hides the AI
+    // Workspace entry outright, which is not what is under test.
+    SharedPreferences.setMockInitialValues({AiService.enabledPrefKey: true});
     prefs = await SharedPreferences.getInstance();
     // Most of these assertions are about the *backend* gate; the unreleased
     // gate is exercised on its own below, so keep it out of the way here.
