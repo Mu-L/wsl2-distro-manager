@@ -1327,5 +1327,22 @@
   "convertingwslversion-text": "%s0 átalakítása WSL %s1 verzióra…",
   "convertedwslversion-text": "%s0 mostantól WSL %s1.",
   "convertwslversionfailed-text": "%s0 átalakítása nem sikerült. %s1",
-  "wslversionsunavailable-text": "A wsl.exe nem jelentett verziókat. %s"
+  "wslversionsunavailable-text": "A wsl.exe nem jelentett verziókat. %s",
+  "vmresize-text": "Átméretezés",
+  "vmresizetitle-text": "'%s' átméretezése",
+  "vmresizebody-text": "Mennyi gépet kap ez a VM. A VM-nek leállítva kell lennie; az új értékek a következő indításkor lépnek életbe.",
+  "vmresizecpus-text": "CPU-magok",
+  "vmresizememory-text": "Memória (GB)",
+  "vmresizedisk-text": "Lemez (GB)",
+  "vmresizecurrent-text": "Most: %s0 mag, %s1 GB memória, %s2 GB lemez. Ennek a Macnek %s3 magja van.",
+  "vmresizerunning-text": "A VM fut. Előbb állítsd le — a hardvere rögzített, amíg fut.",
+  "vmresizeshrink-text": "A lemez csak növekedhet. A kisebbítés elvágná a partíciókat, amelyeket a vendég a végére tett.",
+  "vmresizepositive-text": "Írj minden mezőbe nullánál nagyobb egész számot.",
+  "vmresizenochange-text": "Ezek azok az értékek, amelyekkel a VM már rendelkezik.",
+  "vmresizeunknown-text": "Ez a VM nem található.",
+  "vmresizenextstart-text": "A következő indításkor lép életbe",
+  "vmresizeguestgrows-text": "A nagyobb lemez nagyobb blokkeszközként jelenik meg a vendégben; ez a Linux vendég indításkor magától megnöveli a saját gyökér-fájlrendszerét.",
+  "vmresizeguestmanual-text": "A nagyobb lemez nagyobb blokkeszközként jelenik meg a vendégben, de a vendég megtartja a meglévő fájlrendszerét. Növeld meg a vendégen belül — macOS alatt a Lemezkezelővel, Linuxon growpart és resize2fs paranccsal.",
+  "vmresizing-text": "%s átméretezése…",
+  "vmresized-text": "%s0 mostantól %s1 magot, %s2 GB memóriát és %s3 GB lemezt kap. A következő indításkor lép életbe."
 }

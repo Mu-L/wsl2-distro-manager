@@ -44,6 +44,7 @@ import 'package:wsl2distromanager/api/quick_actions.dart';
 import 'package:wsl2distromanager/api/recipes/recipe_catalog.dart';
 import 'package:wsl2distromanager/api/recipes/recipe_service.dart';
 import 'package:wsl2distromanager/api/vm/vm_backend.dart';
+import 'package:wsl2distromanager/api/vm_resize.dart';
 import 'package:wsl2distromanager/api/wsl.dart';
 import 'package:wsl2distromanager/api/wsl_capabilities.dart';
 import 'package:wsl2distromanager/api/wsl_version.dart';
@@ -1422,6 +1423,64 @@ List<McpTool> _appleVmTools(AppleVmApi api) {
           await api.startHeadless(name);
         }
         return 'Started $name.';
+      },
+    ),
+    McpTool(
+      name: 'vm_resize',
+      recording: const ToolRecording(target: 'name'),
+      description:
+          'Change a stopped VM\'s CPU count, memory or disk size; the new '
+          'values are used the next time it starts. Only the values given are '
+          'changed. A disk can only grow — shrinking a raw disk image would '
+          'cut through the guest\'s own partitions.',
+      inputSchema: const {
+        'type': 'object',
+        'properties': {
+          'name': {'type': 'string', 'description': 'Name of the VM.'},
+          'cpus': {'type': 'integer', 'description': 'CPU cores.'},
+          'memory_gb': {'type': 'integer', 'description': 'Memory in GB.'},
+          'disk_gb': {
+            'type': 'integer',
+            'description': 'Disk size in GB; must be at least the current one.',
+          },
+        },
+        'required': ['name'],
+      },
+      handler: (args) async {
+        final name = _requireString(args, 'name');
+        final service = VmResizeService(api);
+        final VmResources current;
+        try {
+          current = await service.read(name);
+        } on VmResizeException catch (error) {
+          throw ArgumentError(
+              vmResizeProblemSummaries[error.message] ?? error.message);
+        }
+        final cpus = (args['cpus'] as num?)?.toInt() ?? current.cpus;
+        final memoryGb =
+            (args['memory_gb'] as num?)?.toInt() ?? current.memoryGb;
+        final diskGb = (args['disk_gb'] as num?)?.toInt() ?? current.diskGb;
+        // The service reports a refusal as an i18n key, which is the UI's
+        // language, not an answer a model can act on.
+        final problem = validateVmResize(
+            current: current, cpus: cpus, memoryGb: memoryGb, diskGb: diskGb);
+        if (problem != null) {
+          throw ArgumentError(vmResizeProblemSummaries[problem] ?? problem);
+        }
+        final result = await service.apply(
+          name,
+          cpus: cpus,
+          memoryGb: memoryGb,
+          diskGb: diskGb,
+        );
+        final grown = result.needsGuestAction
+            ? ' The disk grew, but this guest keeps the filesystem it has — '
+                'grow it from inside the guest.'
+            : '';
+        return '$name now has ${result.cpus} cores, '
+            '${gigabytesOf(result.memoryBytes)} GB memory and a '
+            '${gigabytesOf(result.diskSizeBytes)} GB disk, from its next '
+            'start.$grown';
       },
     ),
     McpTool(

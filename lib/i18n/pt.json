@@ -1329,5 +1329,22 @@
   "convertingwslversion-text": "Convertendo %s0 para WSL %s1…",
   "convertedwslversion-text": "%s0 agora é WSL %s1.",
   "convertwslversionfailed-text": "Não foi possível converter %s0. %s1",
-  "wslversionsunavailable-text": "O wsl.exe não informou nenhuma versão. %s"
+  "wslversionsunavailable-text": "O wsl.exe não informou nenhuma versão. %s",
+  "vmresize-text": "Redimensionar",
+  "vmresizetitle-text": "Redimensionar '%s'",
+  "vmresizebody-text": "Quanta máquina esta VM recebe. A VM precisa estar parada; os novos valores valem a partir da próxima inicialização.",
+  "vmresizecpus-text": "Núcleos de CPU",
+  "vmresizememory-text": "Memória (GB)",
+  "vmresizedisk-text": "Disco (GB)",
+  "vmresizecurrent-text": "Agora: %s0 núcleos, %s1 GB de memória, %s2 GB de disco. Este Mac tem %s3 núcleos.",
+  "vmresizerunning-text": "A VM está em execução. Pare-a primeiro — o hardware dela é fixo enquanto roda.",
+  "vmresizeshrink-text": "Um disco só pode crescer. Reduzi-lo cortaria as partições que o convidado colocou no fim dele.",
+  "vmresizepositive-text": "Digite um número inteiro maior que zero em cada campo.",
+  "vmresizenochange-text": "São os valores que a VM já tem.",
+  "vmresizeunknown-text": "Esta VM não foi encontrada.",
+  "vmresizenextstart-text": "Aplicado na próxima inicialização",
+  "vmresizeguestgrows-text": "Um disco maior chega ao convidado como um dispositivo de bloco maior; este convidado Linux amplia o próprio sistema de arquivos raiz durante o boot.",
+  "vmresizeguestmanual-text": "Um disco maior chega ao convidado como um dispositivo de bloco maior, mas o convidado mantém o sistema de arquivos que tem. Amplie-o de dentro do convidado — Utilitário de Disco no macOS, growpart e resize2fs no Linux.",
+  "vmresizing-text": "Redimensionando %s…",
+  "vmresized-text": "%s0 agora tem %s1 núcleos, %s2 GB de memória e um disco de %s3 GB. Vale a partir da próxima inicialização."
 }

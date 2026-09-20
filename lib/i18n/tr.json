@@ -1327,5 +1327,22 @@
   "convertingwslversion-text": "%s0 WSL %s1 sürümüne dönüştürülüyor…",
   "convertedwslversion-text": "%s0 artık WSL %s1.",
   "convertwslversionfailed-text": "%s0 dönüştürülemedi. %s1",
-  "wslversionsunavailable-text": "wsl.exe herhangi bir sürüm bildirmedi. %s"
+  "wslversionsunavailable-text": "wsl.exe herhangi bir sürüm bildirmedi. %s",
+  "vmresize-text": "Yeniden boyutlandır",
+  "vmresizetitle-text": "'%s' boyutunu değiştir",
+  "vmresizebody-text": "Bu VM'e ne kadar donanım verileceği. VM durdurulmuş olmalı; yeni değerler bir sonraki başlatmada kullanılır.",
+  "vmresizecpus-text": "CPU çekirdeği",
+  "vmresizememory-text": "Bellek (GB)",
+  "vmresizedisk-text": "Disk (GB)",
+  "vmresizecurrent-text": "Şu an: %s0 çekirdek, %s1 GB bellek, %s2 GB disk. Bu Mac'te %s3 çekirdek var.",
+  "vmresizerunning-text": "VM çalışıyor. Önce durdurun — çalışırken donanımı değiştirilemez.",
+  "vmresizeshrink-text": "Disk yalnızca büyüyebilir. Küçültmek, konuğun sonuna koyduğu bölümleri keser.",
+  "vmresizepositive-text": "Her kutuya sıfırdan büyük bir tam sayı girin.",
+  "vmresizenochange-text": "VM zaten bu değerlere sahip.",
+  "vmresizeunknown-text": "Bu VM bulunamadı.",
+  "vmresizenextstart-text": "Bir sonraki başlatmada uygulanır",
+  "vmresizeguestgrows-text": "Daha büyük bir disk konuğa daha büyük bir blok aygıtı olarak ulaşır; bu Linux konuğu açılırken kök dosya sistemini kendisi büyütür.",
+  "vmresizeguestmanual-text": "Daha büyük bir disk konuğa daha büyük bir blok aygıtı olarak ulaşır, ancak konuk mevcut dosya sistemini korur. Konuğun içinden büyütün — macOS'ta Disk İzlencesi, Linux'ta growpart ve resize2fs.",
+  "vmresizing-text": "%s yeniden boyutlandırılıyor…",
+  "vmresized-text": "%s0 artık %s1 çekirdek, %s2 GB bellek ve %s3 GB disk kullanıyor. Bir sonraki başlatmada geçerli olur."
 }

@@ -7,6 +7,7 @@ import 'package:wsl2distromanager/dialogs/snippet_env_dialog.dart';
 import 'package:wsl2distromanager/api/templates.dart';
 import 'package:wsl2distromanager/api/vm/vm_backend.dart';
 import 'package:wsl2distromanager/api/vm/vm_platform.dart';
+import 'package:wsl2distromanager/api/vm_resize.dart';
 import 'package:wsl2distromanager/api/volume_mounts.dart';
 import 'package:wsl2distromanager/api/wsl.dart';
 import 'package:wsl2distromanager/api/wsl_errors.dart';
@@ -19,6 +20,7 @@ import 'package:wsl2distromanager/dialogs/dialogs.dart';
 import 'package:wsl2distromanager/dialogs/file_transfer_dialog.dart';
 import 'package:wsl2distromanager/dialogs/guest_access_dialog.dart';
 import 'package:wsl2distromanager/dialogs/vm_credentials_dialog.dart';
+import 'package:wsl2distromanager/dialogs/vm_resize_dialog.dart';
 import 'package:wsl2distromanager/dialogs/volume_mounts_dialog.dart';
 
 /// Builder for the WSL Distro List Items. Each item is an expander with [item]
@@ -799,6 +801,28 @@ class Bar extends StatelessWidget {
                         onPressed: () {
                           plausible.event(name: "wsl_mounts");
                           showVolumeMountsDialog(widget.item);
+                        }),
+                  ),
+                ),
+              ),
+              // How much machine the instance gets. Next to the shares
+              // because both are "what this VM is made of" rather than
+              // something you do to it, and gated the same way: the Apple
+              // backend can change it, WSL sizes its disk from the disk
+              // dialog instead (bostrot/ai-tasks#103).
+              if (VmResizeService.isSupported(api))
+              MergeSemantics(
+                child: Tooltip(
+                  message: 'vmresize-text'.i18n(),
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: IconButton(
+                        key: ValueKey('test-listitem-resize-${widget.item}'),
+                        icon: const Icon(FluentIcons.hard_drive_group,
+                            size: 16.0),
+                        onPressed: () {
+                          plausible.event(name: "vm_resize");
+                          showVmResizeDialog(widget.item);
                         }),
                   ),
                 ),

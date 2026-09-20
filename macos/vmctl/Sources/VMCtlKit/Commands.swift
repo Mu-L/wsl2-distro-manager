@@ -204,6 +204,8 @@ public enum VmctlCLI {
                 try mount(store, rest)
             case "unmount":
                 try unmount(store, rest)
+            case "resize":
+                try resize(store, rest)
             case "help", "--help", "-h":
                 print(usage)
             default:
@@ -259,6 +261,14 @@ public enum VmctlCLI {
                                             Files/PATH. Takes effect on the
                                             VM's next start
       unmount --name N --guest PATH         Stop sharing a directory
+      resize --name N [--disk-size GB] [--cpus N] [--memory GB]
+                                            Change a stopped VM's hardware.
+                                            Takes effect on its next start.
+                                            The disk can only grow; a Linux
+                                            guest seeded by this app then
+                                            grows its own filesystem on that
+                                            boot, anything else has to be
+                                            grown from inside the guest
 
     """
 

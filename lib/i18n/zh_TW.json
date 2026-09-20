@@ -1328,5 +1328,22 @@
   "convertingwslversion-text": "正在將 %s0 轉換為 WSL %s1…",
   "convertedwslversion-text": "%s0 現在是 WSL %s1。",
   "convertwslversionfailed-text": "無法轉換 %s0。%s1",
-  "wslversionsunavailable-text": "wsl.exe 未回報任何版本。%s"
+  "wslversionsunavailable-text": "wsl.exe 未回報任何版本。%s",
+  "vmresize-text": "調整規格",
+  "vmresizetitle-text": "調整 '%s' 的規格",
+  "vmresizebody-text": "這台虛擬機分到多少硬體。虛擬機必須處於停止狀態，新的數值會在下次啟動時生效。",
+  "vmresizecpus-text": "CPU 核心數",
+  "vmresizememory-text": "記憶體 (GB)",
+  "vmresizedisk-text": "磁碟 (GB)",
+  "vmresizecurrent-text": "目前：%s0 核心、%s1 GB 記憶體、%s2 GB 磁碟。這台 Mac 有 %s3 個核心。",
+  "vmresizerunning-text": "虛擬機正在執行。請先停止它——執行期間硬體組態無法變更。",
+  "vmresizeshrink-text": "磁碟只能變大。縮小會切斷客體放在末端的分割區。",
+  "vmresizepositive-text": "請在每個輸入框中填入大於零的整數。",
+  "vmresizenochange-text": "虛擬機已經是這些數值。",
+  "vmresizeunknown-text": "找不到這台虛擬機。",
+  "vmresizenextstart-text": "在下次啟動時生效",
+  "vmresizeguestgrows-text": "磁碟變大後，客體會看到更大的區塊裝置；這台 Linux 客體會在開機時自行擴充根檔案系統。",
+  "vmresizeguestmanual-text": "磁碟變大後，客體會看到更大的區塊裝置，但檔案系統維持原樣。請在客體內部擴充——macOS 使用磁碟工具程式，Linux 使用 growpart 與 resize2fs。",
+  "vmresizing-text": "正在調整 %s 的規格…",
+  "vmresized-text": "%s0 現在有 %s1 個核心、%s2 GB 記憶體與 %s3 GB 磁碟，下次啟動時生效。"
 }

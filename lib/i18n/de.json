@@ -1328,5 +1328,22 @@
   "convertingwslversion-text": "%s0 wird zu WSL %s1 konvertiert …",
   "convertedwslversion-text": "%s0 ist jetzt WSL %s1.",
   "convertwslversionfailed-text": "%s0 konnte nicht konvertiert werden. %s1",
-  "wslversionsunavailable-text": "wsl.exe hat keine Versionen gemeldet. %s"
+  "wslversionsunavailable-text": "wsl.exe hat keine Versionen gemeldet. %s",
+  "vmresize-text": "Größe ändern",
+  "vmresizetitle-text": "Größe von '%s' ändern",
+  "vmresizebody-text": "Wie viel Maschine diese VM bekommt. Die VM muss gestoppt sein; die neuen Werte gelten ab dem nächsten Start.",
+  "vmresizecpus-text": "CPU-Kerne",
+  "vmresizememory-text": "Arbeitsspeicher (GB)",
+  "vmresizedisk-text": "Festplatte (GB)",
+  "vmresizecurrent-text": "Aktuell: %s0 Kerne, %s1 GB Arbeitsspeicher, %s2 GB Festplatte. Dieser Mac hat %s3 Kerne.",
+  "vmresizerunning-text": "Die VM läuft. Stoppe sie zuerst — ihre Hardware steht fest, solange sie läuft.",
+  "vmresizeshrink-text": "Eine Festplatte kann nur wachsen. Sie zu verkleinern würde die Partitionen zerschneiden, die der Gast ans Ende gelegt hat.",
+  "vmresizepositive-text": "Gib in jedes Feld eine ganze Zahl größer als null ein.",
+  "vmresizenochange-text": "Das sind die Werte, die die VM bereits hat.",
+  "vmresizeunknown-text": "Diese VM wurde nicht gefunden.",
+  "vmresizenextstart-text": "Wird beim nächsten Start übernommen",
+  "vmresizeguestgrows-text": "Eine größere Festplatte erreicht den Gast als größeres Blockgerät; dieser Linux-Gast vergrößert sein Root-Dateisystem beim Booten selbst.",
+  "vmresizeguestmanual-text": "Eine größere Festplatte erreicht den Gast als größeres Blockgerät, der Gast behält aber sein bisheriges Dateisystem. Vergrößere es im Gast — Festplattendienstprogramm unter macOS, growpart und resize2fs unter Linux.",
+  "vmresizing-text": "Größe von %s wird geändert…",
+  "vmresized-text": "%s0 hat jetzt %s1 Kerne, %s2 GB Arbeitsspeicher und eine %s3 GB große Festplatte. Wirksam ab dem nächsten Start."
 }

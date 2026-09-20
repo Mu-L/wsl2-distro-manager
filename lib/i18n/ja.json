@@ -1327,5 +1327,22 @@
   "convertingwslversion-text": "%s0 を WSL %s1 に変換しています…",
   "convertedwslversion-text": "%s0 は WSL %s1 になりました。",
   "convertwslversionfailed-text": "%s0 を変換できませんでした。%s1",
-  "wslversionsunavailable-text": "wsl.exe からバージョンが報告されませんでした。%s"
+  "wslversionsunavailable-text": "wsl.exe からバージョンが報告されませんでした。%s",
+  "vmresize-text": "サイズ変更",
+  "vmresizetitle-text": "'%s' のサイズを変更",
+  "vmresizebody-text": "この VM に割り当てるハードウェアです。VM は停止している必要があり、新しい値は次回の起動時から使われます。",
+  "vmresizecpus-text": "CPU コア数",
+  "vmresizememory-text": "メモリ (GB)",
+  "vmresizedisk-text": "ディスク (GB)",
+  "vmresizecurrent-text": "現在: %s0 コア、メモリ %s1 GB、ディスク %s2 GB。この Mac のコア数は %s3 です。",
+  "vmresizerunning-text": "VM が実行中です。先に停止してください — 実行中はハードウェア構成を変更できません。",
+  "vmresizeshrink-text": "ディスクは拡張しかできません。縮小するとゲストが末尾に置いたパーティションを断ち切ってしまいます。",
+  "vmresizepositive-text": "各欄に 0 より大きい整数を入力してください。",
+  "vmresizenochange-text": "VM はすでにこの値です。",
+  "vmresizeunknown-text": "この VM は見つかりませんでした。",
+  "vmresizenextstart-text": "次回の起動時に適用されます",
+  "vmresizeguestgrows-text": "ディスクを広げるとゲストからはより大きなブロックデバイスとして見えます。この Linux ゲストは起動中にルートファイルシステムを自分で拡張します。",
+  "vmresizeguestmanual-text": "ディスクを広げるとゲストからはより大きなブロックデバイスとして見えますが、ファイルシステムはそのままです。ゲストの中で拡張してください — macOS ならディスクユーティリティ、Linux なら growpart と resize2fs です。",
+  "vmresizing-text": "%s のサイズを変更しています…",
+  "vmresized-text": "%s0 は %s1 コア、メモリ %s2 GB、ディスク %s3 GB になりました。次回の起動時から有効になります。"
 }

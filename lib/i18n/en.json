@@ -1327,5 +1327,22 @@
   "convertingwslversion-text": "Converting %s0 to WSL %s1…",
   "convertedwslversion-text": "%s0 is now WSL %s1.",
   "convertwslversionfailed-text": "Could not convert %s0. %s1",
-  "wslversionsunavailable-text": "wsl.exe did not report any versions. %s"
+  "wslversionsunavailable-text": "wsl.exe did not report any versions. %s",
+  "vmresize-text": "Resize",
+  "vmresizetitle-text": "Resize '%s'",
+  "vmresizebody-text": "How much machine this VM gets. The VM has to be stopped, and the new values are used the next time it starts.",
+  "vmresizecpus-text": "CPU cores",
+  "vmresizememory-text": "Memory (GB)",
+  "vmresizedisk-text": "Disk (GB)",
+  "vmresizecurrent-text": "Now: %s0 cores, %s1 GB memory, %s2 GB disk. This Mac has %s3 cores.",
+  "vmresizerunning-text": "The VM is running. Stop it first — its hardware is fixed for as long as it runs.",
+  "vmresizeshrink-text": "A disk can only grow. Making it smaller would cut through the partitions the guest put at the end of it.",
+  "vmresizepositive-text": "Enter a whole number greater than zero in each box.",
+  "vmresizenochange-text": "These are the values the VM already has.",
+  "vmresizeunknown-text": "This VM could not be found.",
+  "vmresizenextstart-text": "Applied on the next start",
+  "vmresizeguestgrows-text": "A bigger disk reaches the guest as a bigger block device; this Linux guest grows its own root filesystem to fill it while it boots.",
+  "vmresizeguestmanual-text": "A bigger disk reaches the guest as a bigger block device, but the guest keeps the filesystem it has. Grow it from inside the guest — Disk Utility on macOS, growpart and resize2fs on Linux.",
+  "vmresizing-text": "Resizing %s…",
+  "vmresized-text": "%s0 now has %s1 cores, %s2 GB memory and a %s3 GB disk. It takes effect on the next start."
 }
