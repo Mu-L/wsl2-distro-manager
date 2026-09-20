@@ -58,6 +58,7 @@
 - [x] Turnkey Linux y otros contenedores LXC (experimental)
 - [x] Fragmentos: guarda tus comandos de configuración en la app y ejecútalos en cualquier instancia
 - [x] Apunta la app a tu propio repositorio de imágenes rootfs
+- [x] Explora los archivos de una distro y copia los que elijas a otra instancia — sin recursos compartidos, sin montajes y sin Explorador
 
 <!-- Unreleased. Containers, Kubernetes and Cloud are built but ship only in
      debug runs (LicenseManager.unreleasedFeaturesVisible, the gate Pro rides

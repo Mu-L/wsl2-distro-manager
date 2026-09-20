@@ -56,6 +56,7 @@
 - [x] Turnkey Linux 及其他 LXC 容器（實驗性）
 - [x] 指令片段：把安裝設定指令保存在應用程式裡，並在任何執行個體上執行
 - [x] 讓應用程式指向你自己的 rootfs 映像檔儲存庫
+- [x] 瀏覽發行版中的檔案，把選取的複製到另一個安裝實體 — 不需共用、不需掛載、不需檔案總管
 
 <!-- Unreleased. Containers, Kubernetes and Cloud are built but ship only in
      debug runs (LicenseManager.unreleasedFeaturesVisible, the gate Pro rides

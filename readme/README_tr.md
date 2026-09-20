@@ -58,6 +58,7 @@
 - [x] Turnkey Linux ve diğer LXC kapsayıcıları (deneysel)
 - [x] Parçacıklar: kurulum komutlarınızı uygulamada saklayın ve herhangi bir örnekte çalıştırın
 - [x] Uygulamayı kendi rootfs imaj deponuza yönlendirin
+- [x] Bir dağıtımın dosyalarına göz atın ve seçtiklerinizi başka bir dağıtıma kopyalayın — paylaşım, bağlama veya Dosya Gezgini gerekmeden
 
 <!-- Unreleased. Containers, Kubernetes and Cloud are built but ship only in
      debug runs (LicenseManager.unreleasedFeaturesVisible, the gate Pro rides

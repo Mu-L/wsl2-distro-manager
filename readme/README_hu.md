@@ -58,6 +58,7 @@
 - [x] Turnkey Linux és más LXC-konténerek (kísérleti)
 - [x] Parancsrészletek: tartsd a telepítőparancsaidat az alkalmazásban, és futtasd őket bármely példányon
 - [x] Irányítsd az alkalmazást a saját rootfs-képfájl tárolódra
+- [x] Böngészd egy disztró fájljait, és másold a kiválasztottakat egy másik példányba — megosztás, csatolás és Fájlkezelő nélkül
 
 <!-- Unreleased. Containers, Kubernetes and Cloud are built but ship only in
      debug runs (LicenseManager.unreleasedFeaturesVisible, the gate Pro rides

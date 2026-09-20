@@ -57,6 +57,7 @@
 - [x] Turnkey Linux and other LXC containers (experimental)
 - [x] Snippets: keep your setup commands in the app and run them on any instance
 - [x] Point the app at your own repository of rootfs images
+- [x] Browse a distro's files and copy the ones you pick into another instance — no share, no mount, no Explorer needed
 
 <!-- Unreleased. Containers, Kubernetes and Cloud are built but ship only in
      debug runs (LicenseManager.unreleasedFeaturesVisible, the gate Pro rides

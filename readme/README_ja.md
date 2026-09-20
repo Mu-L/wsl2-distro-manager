@@ -58,6 +58,7 @@
 - [x] Turnkey Linux やその他の LXC コンテナ（実験的）
 - [x] スニペット: セットアップ用のコマンドをアプリ内に保存し、任意のインスタンスで実行
 - [x] 自分の rootfs イメージリポジトリをアプリに指定
+- [x] ディストロのファイルを一覧し、選んだものを別のインスタンスにコピー — 共有もマウントもエクスプローラーも不要
 
 <!-- Unreleased. Containers, Kubernetes and Cloud are built but ship only in
      debug runs (LicenseManager.unreleasedFeaturesVisible, the gate Pro rides

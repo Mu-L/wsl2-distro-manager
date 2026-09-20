@@ -58,6 +58,7 @@
 - [x] Turnkey Linux e outros contêineres LXC (experimental)
 - [x] Trechos: mantenha seus comandos de configuração no aplicativo e execute-os em qualquer instância
 - [x] Aponte o aplicativo para o seu próprio repositório de imagens rootfs
+- [x] Navegue pelos arquivos de uma distro e copie os que escolher para outra instância — sem compartilhamento, sem montagem e sem Explorador
 
 <!-- Unreleased. Containers, Kubernetes and Cloud are built but ship only in
      debug runs (LicenseManager.unreleasedFeaturesVisible, the gate Pro rides

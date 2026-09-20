@@ -14,6 +14,7 @@ import 'analytics.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:wsl2distromanager/components/helpers.dart';
 import 'package:wsl2distromanager/dialogs/dialogs.dart';
+import 'package:wsl2distromanager/dialogs/file_transfer_dialog.dart';
 import 'package:wsl2distromanager/dialogs/guest_access_dialog.dart';
 import 'package:wsl2distromanager/dialogs/vm_credentials_dialog.dart';
 import 'package:wsl2distromanager/dialogs/volume_mounts_dialog.dart';
@@ -554,6 +555,34 @@ class Bar extends StatelessWidget {
                     ),
                   ),
                 ),
+              // Next to the folder button, and for the reason that button
+              // exists: opening the host's file manager is how you reach a
+              // distro's files, right up until there is nothing to open —
+              // a stopped distro, a backend with no share. This reaches them
+              // through the instance itself (bostrot/ai-tasks#92).
+              MergeSemantics(
+                child: Tooltip(
+                  message: 'transferfilestooltip-text'.i18n(),
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: Builder(builder: (transferContext) {
+                      return IconButton(
+                        key: ValueKey('test-listitem-transfer-${widget.item}'),
+                        // An arrow out of a box: distinct at 16px from the
+                        // folder four positions along, which the rest of the
+                        // strip's near-identical glyphs were not (audit
+                        // LN-06).
+                        icon: const Icon(FluentIcons.export, size: 16.0),
+                        onPressed: () {
+                          plausible.event(name: "wsl_transfer_files");
+                          showFileTransferDialog(
+                              transferContext, widget.item);
+                        },
+                      );
+                    }),
+                  ),
+                ),
+              ),
               MergeSemantics(
                 child: Tooltip(
                   message: 'openwithexplorer-text'.i18n(),

@@ -59,6 +59,7 @@
 - [x] Turnkey Linux und andere LXC-Container (experimentell)
 - [x] Snippets: Ihre Einrichtungsbefehle in der App behalten und auf jeder Instanz ausführen
 - [x] Die App auf Ihr eigenes Repository mit rootfs-Images zeigen lassen
+- [x] Die Dateien einer Distro durchsehen und die ausgewählten in eine andere Instanz kopieren — ohne Freigabe, ohne Mount, ohne Explorer
 
 <!-- Unreleased. Containers, Kubernetes and Cloud are built but ship only in
      debug runs (LicenseManager.unreleasedFeaturesVisible, the gate Pro rides
