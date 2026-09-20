@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wsl2distromanager/api/app.dart';
 import 'package:wsl2distromanager/api/remote_command.dart';
+import 'package:wsl2distromanager/api/windows_terminal_launcher.dart';
 import 'package:wsl2distromanager/api/wsl.dart';
 import 'package:wsl2distromanager/api/wsl_conf.dart';
 import 'package:wsl2distromanager/api/wslconfig.dart';
@@ -329,6 +330,79 @@ void main() {
       expect(mockShell.lastStartArguments, contains('wsl'));
       expect(mockShell.lastStartArguments, contains('-d'));
       expect(mockShell.lastStartArguments, contains('Ubuntu'));
+    });
+
+    // bostrot/wsl2-distro-manager#279: a start used to open whatever the
+    // default profile looks like, because `wsl -d <name>` says nothing about
+    // which distro's Windows Terminal profile the tab belongs to.
+    group('Windows Terminal profile', () {
+      /// A Windows host with Windows Terminal installed — the suite runs on
+      /// neither, so both are injected.
+      WSLApi onWindows() => WSLApi(
+            shell: mockShell,
+            terminalLauncher: const WindowsTerminalLauncher(
+              hostIsWindows: true,
+              executablePath: r'C:\wt.exe',
+            ),
+          );
+
+      setUp(() => prefs.remove('Terminal'));
+
+      // Also on the way out, so a failed expectation cannot leave a terminal
+      // or an off switch behind for the groups that follow.
+      tearDown(() async {
+        await prefs.remove('Terminal');
+        await prefs.remove(WindowsTerminalLauncher.prefEnabled);
+      });
+
+      test('start names the instance profile', () async {
+        await onWindows().start('Ubuntu');
+
+        expect(mockShell.lastStartExecutable, 'start');
+        expect(mockShell.lastStartArguments,
+            ['wt', '-w', '0', 'nt', '-p', 'Ubuntu', 'wsl', '-d', 'Ubuntu']);
+      });
+
+      test('start keeps the path, the user and the start command', () async {
+        await onWindows().start('Ubuntu',
+            startPath: '/home/me', startUser: 'me', startCmd: 'htop');
+
+        final args = mockShell.lastStartArguments;
+        expect(args.take(6), ['wt', '-w', '0', 'nt', '-p', 'Ubuntu']);
+        expect(args, containsAllInOrder(['--cd', '/home/me']));
+        expect(args, containsAllInOrder(['--user', 'me']));
+        // The shell that keeps the window open has to reach wsl.exe, so its
+        // semicolon must not read as a second Windows Terminal command.
+        expect(args.last, r'\;/bin/sh');
+      });
+
+      test('a host without Windows Terminal starts as before', () async {
+        final api = WSLApi(
+          shell: mockShell,
+          terminalLauncher: const WindowsTerminalLauncher(
+              hostIsWindows: true, executablePath: ''),
+        );
+        await api.start('Ubuntu');
+
+        expect(mockShell.lastStartExecutable, 'start');
+        expect(mockShell.lastStartArguments, ['wsl', '-d', 'Ubuntu']);
+      });
+
+      test('the preference turns the rewrite off', () async {
+        await prefs.setBool(WindowsTerminalLauncher.prefEnabled, false);
+        await onWindows().start('Ubuntu');
+
+        expect(mockShell.lastStartArguments, ['wsl', '-d', 'Ubuntu']);
+      });
+
+      test('a Windows Terminal set by hand gains the profile', () async {
+        prefs.setString('Terminal', 'wt.exe');
+        await onWindows().start('Ubuntu');
+
+        expect(mockShell.lastStartExecutable, 'wt.exe');
+        expect(mockShell.lastStartArguments,
+            ['-w', '0', 'nt', '-p', 'Ubuntu', 'wsl', '-d', 'Ubuntu']);
+      });
     });
   });
 

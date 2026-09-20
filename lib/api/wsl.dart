@@ -24,6 +24,7 @@ import 'package:wsl2distromanager/api/wsl_conf.dart';
 import 'package:wsl2distromanager/api/wsl_errors.dart';
 import 'package:wsl2distromanager/api/wsl_distribution_conf.dart';
 import 'package:wsl2distromanager/api/wslconfig.dart';
+import 'package:wsl2distromanager/api/windows_terminal_launcher.dart';
 import 'package:wsl2distromanager/components/constants.dart';
 import 'package:wsl2distromanager/api/cloud_init.dart';
 import 'package:wsl2distromanager/components/helpers.dart';
@@ -136,15 +137,21 @@ class WSLApi extends VmBackend {
   /// How [create] fetches a rootfs. Only tests replace it.
   final ChunkedDownloaderFactory _downloaderFactory;
 
+  /// How a start reaches Windows Terminal. Only tests replace it — off a
+  /// Windows host it decides nothing.
+  final WindowsTerminalLauncher _terminalLauncher;
+
   WSLApi(
       {Shell? shell,
       ExecutionBroker? broker,
       WslCapabilityService? capabilities,
-      ChunkedDownloaderFactory? downloaderFactory})
+      ChunkedDownloaderFactory? downloaderFactory,
+      WindowsTerminalLauncher? terminalLauncher})
       : shell = shell ?? ProcessShell(),
         _broker = broker,
         _hasInjectedShell = shell != null,
         _capabilities = capabilities,
+        _terminalLauncher = terminalLauncher ?? const WindowsTerminalLauncher(),
         _downloaderFactory =
             downloaderFactory ?? defaultChunkedDownloaderFactory {
     if (!inited) {
@@ -679,14 +686,20 @@ class WSLApi extends VmBackend {
     if (terminal != null && terminal.isNotEmpty) {
       executable = terminal;
     }
-    // If using Windows Terminal, open in new tab of existing window
-    if (executable.toLowerCase().endsWith('wt.exe') ||
-        executable.toLowerCase() == 'wt') {
-      // -w 0 targets the existing window (or creates one if none exists)
-      // nt (new-tab) creates a new tab
-      // We insert these at the beginning of the arguments list
-      args.insertAll(0, ['-w', '0', 'nt']);
-    }
+
+    // A distro's colours, font and opacity live in its Windows Terminal
+    // profile, and `wsl -d <name>` reaches none of it: the window that opens
+    // does not know which distro it is showing and uses the default profile.
+    // The launcher turns the command into `wt -w 0 nt -p <name> …`, which is
+    // the same tab Windows Terminal's own dropdown opens.
+    final launch = _terminalLauncher.resolve(
+      instance: distribution,
+      executable: executable,
+      arguments: args,
+      remote: _useRemoteWsl,
+    );
+    executable = launch.executable;
+    args = launch.arguments;
 
     if (Platform.isLinux) {
       await _startLinuxTerminal(args);
@@ -1063,9 +1076,15 @@ class WSLApi extends VmBackend {
     }
 
       try {
-        // Run windows terminal in same window wt -w 0 nt
-        var args = ['wt', '-w', '0', 'nt'];
-        args.addAll(launchWslHome);
+        // Run windows terminal in same window wt -w 0 nt, dressed in the
+        // instance's own profile.
+        final launch = _terminalLauncher.resolve(
+          instance: distribution,
+          executable: 'wt',
+          arguments: launchWslHome,
+          remote: _useRemoteWsl,
+        );
+        var args = [launch.executable, ...launch.arguments];
 
         if (_broker != null) {
           await _broker!.run(ExecutionRequest(command: 'start', arguments: args));
