@@ -40,7 +40,9 @@ class _MockPlausible implements Plausible {
           {String? name,
           String? page,
           Map<String, String>? props,
-          String? referrer}) async =>
+          String? referrer,
+          PlausibleRevenue? revenue,
+          bool interactive = true}) async =>
       200;
 
   @override

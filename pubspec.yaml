@@ -25,11 +25,12 @@ dependencies:
   flutter_markdown: ^0.7.7
   go_router: ^17.0.0
   http: ^1.6.0
+  intl: ^0.20.2
   localization: ^2.1.1
   markdown: ^7.2.2
   package_info_plus: ^9.0.0
   path: ^1.9.1
-  plausible_analytics: ^0.3.0
+  plausible_analytics: ^0.4.1
   provider: ^6.1.5
   re_editor: ^0.10.0
   re_highlight: ^0.0.3
