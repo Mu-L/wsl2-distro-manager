@@ -99,7 +99,7 @@ What it does is narrower in three ways that the dialog never states:
 
 1. It only applies to launches **from this app**. Typing `wsl` in a terminal, or any other
    WSL client, still lands as the distro's real default user — which is exactly the
-   symptom reported in [#268](https://github.com/bostrot/wsl2-distro-manager/issues/268).
+   symptom reported in [#268](https://github.com/bostrot/wslmanager/issues/268).
 2. It is per-machine `SharedPreferences`, so it does not travel with an exported distro.
 3. It cannot be discovered by anything except this dialog; nothing writes it into the
    distro.
@@ -135,11 +135,11 @@ reopened.
 The correct parser is already in the codebase — `WSLApi.getWSLConf` (`wsl.dart:1824-1846`)
 tracks `[section]` headers properly on the *read* path. Only the write path is broken.
 
-**Reported twice.** [#185](https://github.com/bostrot/wsl2-distro-manager/issues/185)
+**Reported twice.** [#185](https://github.com/bostrot/wslmanager/issues/185)
 (closed): a hostname set from the app never reaches `/etc/wsl.conf`, and the reporter's own
 workaround — `echo -e "[network]\nhostname=guitest" >> /etc/wsl.conf` — is this script's
 third branch, the only one that is not `sed`.
-[#309](https://github.com/bostrot/wsl2-distro-manager/issues/309) (**open**): setting a
+[#309](https://github.com/bostrot/wslmanager/issues/309) (**open**): setting a
 default user at creation lost `[boot] systemd=true`. That call site was since routed through
 `setSetting` (`create_dialog.dart:324`, commit `4913741`, 2026-06-16) — the issue is still
 open, and the section-blind writer beneath it is unchanged.
@@ -220,11 +220,11 @@ terminals, which is what a user looking for this setting will find instead.
 
 The classification pass found three reports of this one finding, which makes it the
 best-evidenced gap in the audit after the move:
-[#268](https://github.com/bostrot/wsl2-distro-manager/issues/268) (**open**) — typing `wsl`
+[#268](https://github.com/bostrot/wslmanager/issues/268) (**open**) — typing `wsl`
 lands in root at `/mnt/c/Users/…` after creating a distro here;
-[#313](https://github.com/bostrot/wsl2-distro-manager/issues/313) (**open**) — a deleted
+[#313](https://github.com/bostrot/wslmanager/issues/313) (**open**) — a deleted
 distro's user is still applied to a new distro of the same name, because the prefs outlive
-it; [#192](https://github.com/bostrot/wsl2-distro-manager/issues/192) — default user lost
+it; [#192](https://github.com/bostrot/wslmanager/issues/192) — default user lost
 after shrink/cleanup. Sized as P05-05 in [[index]].
 
 ### CC-7 — Free-text values reach a **root** shell unescaped

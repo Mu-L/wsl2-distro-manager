@@ -27,7 +27,7 @@ import 'package:wsl2distromanager/components/helpers.dart';
 /// The human-readable releases page. Used as the fallback link when a release
 /// carries no artefact this host can install.
 const String releasesPageUrl =
-    'https://github.com/bostrot/wsl2-distro-manager/releases';
+    'https://github.com/bostrot/wslmanager/releases';
 
 /// Where this copy of the app came from, which is what decides whether it may
 /// update itself.

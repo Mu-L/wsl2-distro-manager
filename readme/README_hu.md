@@ -1,9 +1,9 @@
 <h1 align="center">Üdvözlünk a WSL Managerben 👋</h1>
 
-![GitHub Release Date](https://img.shields.io/github/release-date/bostrot/wsl2-distro-manager?style=for-the-badge)
-![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/bostrot/wsl2-distro-manager/releaser.yml?branch=main&label=nightly&style=for-the-badge)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/bostrot/wsl2-distro-manager?style=for-the-badge)
-[![Documentation](https://img.shields.io/badge/DOCUMENTATION-WIKI-green?style=for-the-badge)](https://github.com/bostrot/wsl2-distro-manager/wiki)
+![GitHub Release Date](https://img.shields.io/github/release-date/bostrot/wslmanager?style=for-the-badge)
+![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/bostrot/wslmanager/releaser.yml?branch=main&label=nightly&style=for-the-badge)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/bostrot/wslmanager?style=for-the-badge)
+[![Documentation](https://img.shields.io/badge/DOCUMENTATION-WIKI-green?style=for-the-badge)](https://github.com/bostrot/wslmanager/wiki)
 [![GitLab stars](https://img.shields.io/gitlab/stars/bostrot/wsl2-distro-manager?gitlab_url=https%3A%2F%2Fgitlab.com&label=GitLab&style=for-the-badge)](https://gitlab.com/bostrot/wsl2-distro-manager)
 [![Discord](https://img.shields.io/discord/1100070299308937287?style=for-the-badge)](https://discord.gg/fY5uE5WRTP)
 
@@ -121,7 +121,7 @@
 > OpenAI-kompatibilis API-kulcsoddal. Semmilyen MI-szolgáltatás nincs üzemeltetve
 > vagy mellékelve, nincs kvóta, és egyetlen kérés sem halad át más kiszolgálóján.
 > A Pro az alkalmazás funkcióit oldja fel; nem MI-kreditet vásárolsz vele. Lásd:
-> [Free vs Pro](https://github.com/bostrot/wsl2-distro-manager/wiki/Pro-Version).
+> [Free vs Pro](https://github.com/bostrot/wslmanager/wiki/Pro-Version).
 
 > **Miért van egyáltalán fizetős csomag?** A WSL Manager 2021 óta egyszemélyes,
 > szabadidőben készülő projekt, és a fenti összes funkció — az ingyenesek is —
@@ -273,7 +273,7 @@ Apple Silicon, macOS 11 vagy újabb. A cask a [bostrot/homebrew-tap](https://git
 <details>
 <summary>Közvetlen letöltés</summary>
 
-Az alkalmazást közvetlenül is letöltheted a [Releases](https://github.com/bostrot/wsl2-distro-manager/releases) oldalról. A Windows-változat telepítő `.exe`, `.msix` és hordozható `.zip` formában érkezik; a macOS-változat `.dmg`-ként.
+Az alkalmazást közvetlenül is letöltheted a [Releases](https://github.com/bostrot/wslmanager/releases) oldalról. A Windows-változat telepítő `.exe`, `.msix` és hordozható `.zip` formában érkezik; a macOS-változat `.dmg`-ként.
 </details>
 
 <details>
@@ -308,7 +308,7 @@ choco install wsl2-distro-manager
 <details>
 <summary>Éjszakai build telepítése</summary>
 
-A legfrissebb éjszakai build a „releaser” munkafolyamat termékeként, vagy [ezen a hivatkozáson](https://nightly.link/bostrot/wsl2-distro-manager/workflows/releaser/main/wsl2-distro-manager-nightly-archive.zip) keresztül érhető el.
+A legfrissebb éjszakai build a „releaser” munkafolyamat termékeként, vagy [ezen a hivatkozáson](https://nightly.link/bostrot/wslmanager/workflows/releaser/main/wsl2-distro-manager-nightly-archive.zip) keresztül érhető el.
 
 </details>
 
@@ -374,13 +374,13 @@ teljes Xcode szükséges.
 
 👥 **Közreműködők**
 
-[![Contributors](https://contrib.rocks/image?repo=bostrot/wsl2-distro-manager)](https://github.com/bostrot/wsl2-distro-manager/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=bostrot/wslmanager)](https://github.com/bostrot/wslmanager/graphs/contributors)
 
 ## 🤝 Hozzájárulás
 
 A hozzájárulásokat, hibajelentéseket és funkciókéréseket szívesen fogadjuk!\
-Nézd meg az [issues oldalt](https://github.com/bostrot/wsl2-distro-manager/issues).
-Érdemes belenézni a [hozzájárulási útmutatóba](https://github.com/bostrot/wsl2-distro-manager/blob/main/CONTRIBUTING.md) is.
+Nézd meg az [issues oldalt](https://github.com/bostrot/wslmanager/issues).
+Érdemes belenézni a [hozzájárulási útmutatóba](https://github.com/bostrot/wslmanager/blob/main/CONTRIBUTING.md) is.
 
 ## Támogasd a projektet
 
@@ -389,8 +389,8 @@ Adj egy ⭐️-ot, ha ez a projekt segített neked!
 ## 📝 Licenc
 
 Copyright © 2026 [Eric Trenkel](https://github.com/bostrot).\
-Ez a projekt [GPL-3.0](https://github.com/bostrot/wsl2-distro-manager/blob/main/LICENSE) licenc alatt áll.
+Ez a projekt [GPL-3.0](https://github.com/bostrot/wslmanager/blob/main/LICENSE) licenc alatt áll.
 
 ---
 
-_Nem találtad, amit kerestél? Nézz körül a [Wikiben](https://github.com/bostrot/wsl2-distro-manager/wiki)_
+_Nem találtad, amit kerestél? Nézz körül a [Wikiben](https://github.com/bostrot/wslmanager/wiki)_

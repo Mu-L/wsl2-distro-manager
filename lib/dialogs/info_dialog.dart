@@ -12,7 +12,7 @@ import 'package:wsl2distromanager/components/notify.dart';
 import 'package:wsl2distromanager/oss_licenses.dart';
 import 'base_dialog.dart';
 
-const String _repoUrl = 'https://github.com/bostrot/wsl2-distro-manager';
+const String _repoUrl = 'https://github.com/bostrot/wslmanager';
 const String _releasesUrl = '$_repoUrl/releases';
 const String _wikiUrl = '$_repoUrl/wiki';
 const String _licenseUrl = '$_repoUrl/blob/main/LICENSE';

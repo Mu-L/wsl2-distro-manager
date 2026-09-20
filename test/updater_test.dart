@@ -110,7 +110,7 @@ Map<String, Object?> _release(
     'draft': draft,
     'prerelease': prerelease,
     'published_at': DateTime.now().toUtc().subtract(age).toIso8601String(),
-    'html_url': 'https://github.com/bostrot/wsl2-distro-manager/releases/$tag',
+    'html_url': 'https://github.com/bostrot/wslmanager/releases/$tag',
     'assets': assets ??
         [
           {

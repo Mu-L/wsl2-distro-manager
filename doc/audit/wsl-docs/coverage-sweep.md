@@ -179,7 +179,7 @@ cover.
 
 A false-negative sweep that only ever adds findings is not a sweep. [[index]]'s
 classification pass attached a mechanism to
-[#313](https://github.com/bostrot/wsl2-distro-manager/issues/313) — "the prefs outlive the
+[#313](https://github.com/bostrot/wslmanager/issues/313) — "the prefs outlive the
 distro, so a recreated distro of the same name inherits a deleted user" — and made it part
 of P05-05's scope. That mechanism is **already fixed** in this tree:
 

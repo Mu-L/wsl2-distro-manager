@@ -1,9 +1,9 @@
 <h1 align="center">WSL Manager へようこそ 👋</h1>
 
-![GitHub Release Date](https://img.shields.io/github/release-date/bostrot/wsl2-distro-manager?style=for-the-badge)
-![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/bostrot/wsl2-distro-manager/releaser.yml?branch=main&label=nightly&style=for-the-badge)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/bostrot/wsl2-distro-manager?style=for-the-badge)
-[![Documentation](https://img.shields.io/badge/DOCUMENTATION-WIKI-green?style=for-the-badge)](https://github.com/bostrot/wsl2-distro-manager/wiki)
+![GitHub Release Date](https://img.shields.io/github/release-date/bostrot/wslmanager?style=for-the-badge)
+![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/bostrot/wslmanager/releaser.yml?branch=main&label=nightly&style=for-the-badge)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/bostrot/wslmanager?style=for-the-badge)
+[![Documentation](https://img.shields.io/badge/DOCUMENTATION-WIKI-green?style=for-the-badge)](https://github.com/bostrot/wslmanager/wiki)
 [![GitLab stars](https://img.shields.io/gitlab/stars/bostrot/wsl2-distro-manager?gitlab_url=https%3A%2F%2Fgitlab.com&label=GitLab&style=for-the-badge)](https://gitlab.com/bostrot/wsl2-distro-manager)
 [![Discord](https://img.shields.io/discord/1100070299308937287?style=for-the-badge)](https://discord.gg/fY5uE5WRTP)
 
@@ -121,7 +121,7 @@
 > —— で動きます。AI サービスをホストすることも同梱することもなく、利用枠もなく、
 > リクエストが誰かのサーバーを経由することもありません。Pro が解除するのはアプリ
 > 内の機能であって、AI のクレジットを買うものではありません。
-> [Free vs Pro](https://github.com/bostrot/wsl2-distro-manager/wiki/Pro-Version) を
+> [Free vs Pro](https://github.com/bostrot/wslmanager/wiki/Pro-Version) を
 > ご覧ください。
 
 > **そもそもなぜ有料版があるのか？** WSL Manager は 2021 年から続く、一人が余暇に
@@ -269,7 +269,7 @@ Apple シリコン、macOS 11 以降。cask は [bostrot/homebrew-tap](https://g
 <details>
 <summary>直接ダウンロード</summary>
 
-このアプリは [Releases](https://github.com/bostrot/wsl2-distro-manager/releases) ページから直接ダウンロードできます。Windows 版はセットアップ `.exe`、`.msix`、ポータブルな `.zip` で、macOS 版は `.dmg` で配布しています。
+このアプリは [Releases](https://github.com/bostrot/wslmanager/releases) ページから直接ダウンロードできます。Windows 版はセットアップ `.exe`、`.msix`、ポータブルな `.zip` で、macOS 版は `.dmg` で配布しています。
 </details>
 
 <details>
@@ -304,7 +304,7 @@ choco install wsl2-distro-manager
 <details>
 <summary>ナイトリービルドのインストール</summary>
 
-最新のナイトリービルドは「releaser」ワークフローの成果物として、または[このリンク](https://nightly.link/bostrot/wsl2-distro-manager/workflows/releaser/main/wsl2-distro-manager-nightly-archive.zip)から入手できます。
+最新のナイトリービルドは「releaser」ワークフローの成果物として、または[このリンク](https://nightly.link/bostrot/wslmanager/workflows/releaser/main/wsl2-distro-manager-nightly-archive.zip)から入手できます。
 
 </details>
 
@@ -367,13 +367,13 @@ entitlement が足りないのはアプリではなく*ヘルパー*です —�
 
 👥 **コントリビューター**
 
-[![Contributors](https://contrib.rocks/image?repo=bostrot/wsl2-distro-manager)](https://github.com/bostrot/wsl2-distro-manager/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=bostrot/wslmanager)](https://github.com/bostrot/wslmanager/graphs/contributors)
 
 ## 🤝 コントリビューション
 
 コントリビューション、Issue、機能リクエストを歓迎します！\
-[Issue ページ](https://github.com/bostrot/wsl2-distro-manager/issues)もぜひご覧ください。
-[コントリビューションガイド](https://github.com/bostrot/wsl2-distro-manager/blob/main/CONTRIBUTING.md)も参考になります。
+[Issue ページ](https://github.com/bostrot/wslmanager/issues)もぜひご覧ください。
+[コントリビューションガイド](https://github.com/bostrot/wslmanager/blob/main/CONTRIBUTING.md)も参考になります。
 
 ## サポートを示す
 
@@ -382,8 +382,8 @@ entitlement が足りないのはアプリではなく*ヘルパー*です —�
 ## 📝 ライセンス
 
 Copyright © 2026 [Eric Trenkel](https://github.com/bostrot).\
-このプロジェクトは [GPL-3.0](https://github.com/bostrot/wsl2-distro-manager/blob/main/LICENSE) ライセンスです。
+このプロジェクトは [GPL-3.0](https://github.com/bostrot/wslmanager/blob/main/LICENSE) ライセンスです。
 
 ---
 
-_お探しのものが見つかりませんでしたか？ [Wiki](https://github.com/bostrot/wsl2-distro-manager/wiki) をご覧ください_
+_お探しのものが見つかりませんでしたか？ [Wiki](https://github.com/bostrot/wslmanager/wiki) をご覧ください_

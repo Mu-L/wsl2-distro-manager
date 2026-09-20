@@ -247,7 +247,7 @@ List<NavigationPaneItem> get footerItems => [
       LinkPaneItemAction(
         icon: const Icon(FluentIcons.help),
         title: Text('documentation-text'.i18n()),
-        link: 'https://github.com/bostrot/wsl2-distro-manager/wiki',
+        link: 'https://github.com/bostrot/wslmanager/wiki',
         body: const SizedBox.shrink(),
       ),
       // Same LN-16 rule as Mount Disk: a modal opener is an action.

@@ -1,9 +1,9 @@
 <h1 align="center">欢迎使用 WSL Manager 👋</h1>
 
-![GitHub Release Date](https://img.shields.io/github/release-date/bostrot/wsl2-distro-manager?style=for-the-badge)
-![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/bostrot/wsl2-distro-manager/releaser.yml?branch=main&label=nightly&style=for-the-badge)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/bostrot/wsl2-distro-manager?style=for-the-badge)
-[![Documentation](https://img.shields.io/badge/DOCUMENTATION-WIKI-green?style=for-the-badge)](https://github.com/bostrot/wsl2-distro-manager/wiki)
+![GitHub Release Date](https://img.shields.io/github/release-date/bostrot/wslmanager?style=for-the-badge)
+![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/bostrot/wslmanager/releaser.yml?branch=main&label=nightly&style=for-the-badge)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/bostrot/wslmanager?style=for-the-badge)
+[![Documentation](https://img.shields.io/badge/DOCUMENTATION-WIKI-green?style=for-the-badge)](https://github.com/bostrot/wslmanager/wiki)
 [![GitLab stars](https://img.shields.io/gitlab/stars/bostrot/wsl2-distro-manager?gitlab_url=https%3A%2F%2Fgitlab.com&label=GitLab&style=for-the-badge)](https://gitlab.com/bostrot/wsl2-distro-manager)
 [![Discord](https://img.shields.io/discord/1100070299308937287?style=for-the-badge)](https://discord.gg/fY5uE5WRTP)
 
@@ -118,7 +118,7 @@
 > AI 功能使用**你自己**提供的凭据 —— 你自己的 OpenAI 兼容 API 密钥。本应用不托管
 > 也不附带任何 AI 服务，没有额度限制，也没有任何请求经过他人的服务器。Pro 解锁的
 > 是应用中的功能，而不是购买 AI 额度。参见
-> [Free vs Pro](https://github.com/bostrot/wsl2-distro-manager/wiki/Pro-Version)。
+> [Free vs Pro](https://github.com/bostrot/wslmanager/wiki/Pro-Version)。
 
 > **为什么会有付费版？** 自 2021 年起，WSL Manager 一直是一个人利用业余时间做的
 > 项目，上面的每一项功能 —— 包括免费的那些 —— 都是在夜晚和周末写出来的。管理发行版
@@ -247,7 +247,7 @@ Apple Silicon，macOS 11 或更高版本。该 cask 位于 [bostrot/homebrew-tap
 <details>
 <summary>直接下载</summary>
 
-你可以从 [Releases](https://github.com/bostrot/wsl2-distro-manager/releases) 页面直接下载本应用。Windows 提供安装版 `.exe`、`.msix` 和便携版 `.zip`；macOS 提供 `.dmg`。
+你可以从 [Releases](https://github.com/bostrot/wslmanager/releases) 页面直接下载本应用。Windows 提供安装版 `.exe`、`.msix` 和便携版 `.zip`；macOS 提供 `.dmg`。
 </details>
 
 <details>
@@ -282,7 +282,7 @@ choco install wsl2-distro-manager
 <details>
 <summary>安装每夜构建版</summary>
 
-最新的每夜构建版可在 “releaser” 工作流的构建产物中找到，或通过[此链接](https://nightly.link/bostrot/wsl2-distro-manager/workflows/releaser/main/wsl2-distro-manager-nightly-archive.zip)获取。
+最新的每夜构建版可在 “releaser” 工作流的构建产物中找到，或通过[此链接](https://nightly.link/bostrot/wslmanager/workflows/releaser/main/wsl2-distro-manager-nightly-archive.zip)获取。
 
 </details>
 
@@ -342,13 +342,13 @@ have the "com.apple.security.virtualization" entitlement."
 
 👥 **贡献者**
 
-[![Contributors](https://contrib.rocks/image?repo=bostrot/wsl2-distro-manager)](https://github.com/bostrot/wsl2-distro-manager/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=bostrot/wslmanager)](https://github.com/bostrot/wslmanager/graphs/contributors)
 
 ## 🤝 参与贡献
 
 欢迎贡献代码、提交问题和功能请求！\
-欢迎查看 [issues 页面](https://github.com/bostrot/wsl2-distro-manager/issues)。
-你也可以看看[贡献指南](https://github.com/bostrot/wsl2-distro-manager/blob/main/CONTRIBUTING.md)。
+欢迎查看 [issues 页面](https://github.com/bostrot/wslmanager/issues)。
+你也可以看看[贡献指南](https://github.com/bostrot/wslmanager/blob/main/CONTRIBUTING.md)。
 
 ## 表达支持
 
@@ -357,8 +357,8 @@ have the "com.apple.security.virtualization" entitlement."
 ## 📝 许可证
 
 版权所有 © 2026 [Eric Trenkel](https://github.com/bostrot)。\
-本项目基于 [GPL-3.0](https://github.com/bostrot/wsl2-distro-manager/blob/main/LICENSE) 许可证。
+本项目基于 [GPL-3.0](https://github.com/bostrot/wslmanager/blob/main/LICENSE) 许可证。
 
 ---
 
-_没找到你想要的内容？看看 [Wiki](https://github.com/bostrot/wsl2-distro-manager/wiki)_
+_没找到你想要的内容？看看 [Wiki](https://github.com/bostrot/wslmanager/wiki)_

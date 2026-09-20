@@ -1,9 +1,9 @@
 <h1 align="center">WSL Manager'a hoş geldiniz 👋</h1>
 
-![GitHub Release Date](https://img.shields.io/github/release-date/bostrot/wsl2-distro-manager?style=for-the-badge)
-![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/bostrot/wsl2-distro-manager/releaser.yml?branch=main&label=nightly&style=for-the-badge)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/bostrot/wsl2-distro-manager?style=for-the-badge)
-[![Documentation](https://img.shields.io/badge/DOCUMENTATION-WIKI-green?style=for-the-badge)](https://github.com/bostrot/wsl2-distro-manager/wiki)
+![GitHub Release Date](https://img.shields.io/github/release-date/bostrot/wslmanager?style=for-the-badge)
+![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/bostrot/wslmanager/releaser.yml?branch=main&label=nightly&style=for-the-badge)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/bostrot/wslmanager?style=for-the-badge)
+[![Documentation](https://img.shields.io/badge/DOCUMENTATION-WIKI-green?style=for-the-badge)](https://github.com/bostrot/wslmanager/wiki)
 [![GitLab stars](https://img.shields.io/gitlab/stars/bostrot/wsl2-distro-manager?gitlab_url=https%3A%2F%2Fgitlab.com&label=GitLab&style=for-the-badge)](https://gitlab.com/bostrot/wsl2-distro-manager)
 [![Discord](https://img.shields.io/discord/1100070299308937287?style=for-the-badge)](https://discord.gg/fY5uE5WRTP)
 
@@ -122,7 +122,7 @@
 > ya da birlikte gelmez, kota yoktur ve hiçbir istek başkasının sunucularından
 > geçmez. Pro, uygulamadaki özelliklerin kilidini açar; yapay zekâ kredisi satın
 > almaz. Bkz.
-> [Free vs Pro](https://github.com/bostrot/wsl2-distro-manager/wiki/Pro-Version).
+> [Free vs Pro](https://github.com/bostrot/wslmanager/wiki/Pro-Version).
 
 > **Neden ücretli bir katman var?** WSL Manager 2021'den beri tek kişilik, boş
 > zamanlarda yürütülen bir proje ve yukarıdaki her özellik — ücretsiz olanlar da
@@ -271,7 +271,7 @@ Apple Silicon, macOS 11 veya üzeri. Cask [bostrot/homebrew-tap](https://github.
 <details>
 <summary>Doğrudan indirme</summary>
 
-Bu uygulamayı [Releases](https://github.com/bostrot/wsl2-distro-manager/releases) sayfasından doğrudan indirebilirsiniz. Windows sürümü kurulum `.exe`'si, `.msix` ve taşınabilir `.zip` olarak; macOS sürümü ise `.dmg` olarak dağıtılır.
+Bu uygulamayı [Releases](https://github.com/bostrot/wslmanager/releases) sayfasından doğrudan indirebilirsiniz. Windows sürümü kurulum `.exe`'si, `.msix` ve taşınabilir `.zip` olarak; macOS sürümü ise `.dmg` olarak dağıtılır.
 </details>
 
 <details>
@@ -306,7 +306,7 @@ choco install wsl2-distro-manager
 <details>
 <summary>Gecelik derlemeyi kurma</summary>
 
-En son gecelik derleme, "releaser" iş akışında bir yapı çıktısı olarak ya da [bu bağlantı](https://nightly.link/bostrot/wsl2-distro-manager/workflows/releaser/main/wsl2-distro-manager-nightly-archive.zip) üzerinden edinilebilir.
+En son gecelik derleme, "releaser" iş akışında bir yapı çıktısı olarak ya da [bu bağlantı](https://nightly.link/bostrot/wslmanager/workflows/releaser/main/wsl2-distro-manager-nightly-archive.zip) üzerinden edinilebilir.
 
 </details>
 
@@ -370,13 +370,13 @@ koyar. Uygulamanın kendisini derlemek için tam Xcode gerekir.
 
 👥 **Katkıda bulunanlar**
 
-[![Contributors](https://contrib.rocks/image?repo=bostrot/wsl2-distro-manager)](https://github.com/bostrot/wsl2-distro-manager/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=bostrot/wslmanager)](https://github.com/bostrot/wslmanager/graphs/contributors)
 
 ## 🤝 Katkıda bulunma
 
 Katkılar, sorun bildirimleri ve özellik istekleri memnuniyetle karşılanır!\
-[Sorunlar sayfasına](https://github.com/bostrot/wsl2-distro-manager/issues) göz atabilirsiniz.
-Ayrıca [katkı rehberine](https://github.com/bostrot/wsl2-distro-manager/blob/main/CONTRIBUTING.md) da bakabilirsiniz.
+[Sorunlar sayfasına](https://github.com/bostrot/wslmanager/issues) göz atabilirsiniz.
+Ayrıca [katkı rehberine](https://github.com/bostrot/wslmanager/blob/main/CONTRIBUTING.md) da bakabilirsiniz.
 
 ## Desteğinizi gösterin
 
@@ -385,8 +385,8 @@ Bu proje size yardımcı olduysa bir ⭐️ verin!
 ## 📝 Lisans
 
 Telif hakkı © 2026 [Eric Trenkel](https://github.com/bostrot).\
-Bu proje [GPL-3.0](https://github.com/bostrot/wsl2-distro-manager/blob/main/LICENSE) ile lisanslanmıştır.
+Bu proje [GPL-3.0](https://github.com/bostrot/wslmanager/blob/main/LICENSE) ile lisanslanmıştır.
 
 ---
 
-_Aradığınızı bulamadınız mı? [Wiki](https://github.com/bostrot/wsl2-distro-manager/wiki)'ye göz atın_
+_Aradığınızı bulamadınız mı? [Wiki](https://github.com/bostrot/wslmanager/wiki)'ye göz atın_

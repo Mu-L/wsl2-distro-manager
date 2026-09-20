@@ -1,9 +1,9 @@
 <h1 align="center">Welcome to WSL Manager 👋</h1>
 
-![GitHub Release Date](https://img.shields.io/github/release-date/bostrot/wsl2-distro-manager?style=for-the-badge)
-![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/bostrot/wsl2-distro-manager/releaser.yml?branch=main&label=nightly&style=for-the-badge)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/bostrot/wsl2-distro-manager?style=for-the-badge)
-[![Documentation](https://img.shields.io/badge/DOCUMENTATION-WIKI-green?style=for-the-badge)](https://github.com/bostrot/wsl2-distro-manager/wiki)
+![GitHub Release Date](https://img.shields.io/github/release-date/bostrot/wslmanager?style=for-the-badge)
+![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/bostrot/wslmanager/releaser.yml?branch=main&label=nightly&style=for-the-badge)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/bostrot/wslmanager?style=for-the-badge)
+[![Documentation](https://img.shields.io/badge/DOCUMENTATION-WIKI-green?style=for-the-badge)](https://github.com/bostrot/wslmanager/wiki)
 [![GitLab stars](https://img.shields.io/gitlab/stars/bostrot/wsl2-distro-manager?gitlab_url=https%3A%2F%2Fgitlab.com&label=GitLab&style=for-the-badge)](https://gitlab.com/bostrot/wsl2-distro-manager)
 [![Discord](https://img.shields.io/discord/1100070299308937287?style=for-the-badge)](https://discord.gg/fY5uE5WRTP)
 
@@ -119,7 +119,7 @@
 > The AI features run on credentials **you** bring — your own OpenAI-compatible
 > API key. No AI service is hosted or included, there is no quota, and no
 > requests pass through anyone else's servers. Pro unlocks the features in the
-> app; it does not buy AI credits. See [Free vs Pro](https://github.com/bostrot/wsl2-distro-manager/wiki/Pro-Version).
+> app; it does not buy AI credits. See [Free vs Pro](https://github.com/bostrot/wslmanager/wiki/Pro-Version).
 
 > **Why is there a paid tier at all?** WSL Manager has been a one-person,
 > spare-time project since 2021, and every feature above — the free ones
@@ -264,7 +264,7 @@ Apple silicon, macOS 11 or newer. The cask lives in [bostrot/homebrew-tap](https
 <details>
 <summary>Direct download</summary>
 
-You can get this app with a direct download from the [Releases](https://github.com/bostrot/wsl2-distro-manager/releases) page. Windows ships as a setup `.exe`, an `.msix` and a portable `.zip`; macOS as a `.dmg`.
+You can get this app with a direct download from the [Releases](https://github.com/bostrot/wslmanager/releases) page. Windows ships as a setup `.exe`, an `.msix` and a portable `.zip`; macOS as a `.dmg`.
 </details>
 
 <details>
@@ -299,7 +299,7 @@ choco install wsl2-distro-manager
 <details>
 <summary>Install a nightly build</summary>
 
-The latest nightly build is available as an artifact in the "releaser" workflow or via [this link](https://nightly.link/bostrot/wsl2-distro-manager/workflows/releaser/main/wsl2-distro-manager-nightly-archive.zip).
+The latest nightly build is available as an artifact in the "releaser" workflow or via [this link](https://nightly.link/bostrot/wslmanager/workflows/releaser/main/wsl2-distro-manager-nightly-archive.zip).
 
 </details>
 
@@ -362,13 +362,13 @@ builds the release app, bundling the signed helper into the bundle's
 
 👥 **Contributors**
 
-[![Contributors](https://contrib.rocks/image?repo=bostrot/wsl2-distro-manager)](https://github.com/bostrot/wsl2-distro-manager/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=bostrot/wslmanager)](https://github.com/bostrot/wslmanager/graphs/contributors)
 
 ## 🤝 Contributing
 
 Contributions, issues and feature requests are welcome!\
-Feel free to check the [issues page](https://github.com/bostrot/wsl2-distro-manager/issues).
-You can also take a look at the [contributing guide](https://github.com/bostrot/wsl2-distro-manager/blob/main/CONTRIBUTING.md).
+Feel free to check the [issues page](https://github.com/bostrot/wslmanager/issues).
+You can also take a look at the [contributing guide](https://github.com/bostrot/wslmanager/blob/main/CONTRIBUTING.md).
 
 ## Show your support
 
@@ -377,8 +377,8 @@ Give a ⭐️ if this project helped you!
 ## 📝 License
 
 Copyright © 2026 [Eric Trenkel](https://github.com/bostrot).\
-This project is [GPL-3.0](https://github.com/bostrot/wsl2-distro-manager/blob/main/LICENSE) licensed.
+This project is [GPL-3.0](https://github.com/bostrot/wslmanager/blob/main/LICENSE) licensed.
 
 ---
 
-_Not found what you were looking for? Check out the [Wiki](https://github.com/bostrot/wsl2-distro-manager/wiki)_
+_Not found what you were looking for? Check out the [Wiki](https://github.com/bostrot/wslmanager/wiki)_

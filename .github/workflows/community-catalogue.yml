@@ -16,7 +16,7 @@ on:
     - cron: '17 4 * * *'
   workflow_dispatch:
   # So bostrot/wsl-scripts can publish the moment a script changes:
-  #   gh api repos/bostrot/wsl2-distro-manager/dispatches \
+  #   gh api repos/bostrot/wslmanager/dispatches \
   #     -f event_type=community-scripts-updated
   repository_dispatch:
     types: [community-scripts-updated]

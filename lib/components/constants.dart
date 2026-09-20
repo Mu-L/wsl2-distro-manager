@@ -65,10 +65,10 @@ const String storeReviewUrl =
 const String defaultPath = 'C:\\WSL2-Distros';
 const int chunkSize = 16 * 1024;
 const String updateUrl =
-    'https://api.github.com/repos/bostrot/wsl2-distro-manager/releases';
+    'https://api.github.com/repos/bostrot/wslmanager/releases';
 
 const String motdUrl =
-    'https://raw.githubusercontent.com/bostrot/wsl2-distro-manager/main/motd.json';
+    'https://raw.githubusercontent.com/bostrot/wslmanager/main/motd.json';
 
 const String defaultRepoLink =
     'http://ftp.halifax.rwth-aachen.de/turnkeylinux/images/proxmox/';
@@ -79,7 +79,7 @@ const String gitRepoLink = 'https://n8n.aachen.dev/webhook/cdn/images.json';
 /// usable — on 2026-09-09 it served 200 with an empty body, and every client
 /// quietly fell back to the copy bundled at build time.
 const String gitRepoRawLink =
-    'https://raw.githubusercontent.com/bostrot/wsl2-distro-manager/main/images.json';
+    'https://raw.githubusercontent.com/bostrot/wslmanager/main/images.json';
 
 /// The whole community catalogue in one response: every folder's `info.yml`
 /// already collected, so the browser makes one request where it used to make
@@ -99,7 +99,7 @@ String gitApiCommitsLink =
     'https://api.github.com/repos/bostrot/wsl-scripts/commits';
 
 const String githubIssues =
-    'https://github.com/bostrot/wsl2-distro-manager/issues/new/choose';
+    'https://github.com/bostrot/wslmanager/issues/new/choose';
 
 const String errorUrl =
     'https://n8n.aachen.dev/webhook/error-logging-1866548e-233f-4c09-a257-9f3deab055b3';
@@ -108,7 +108,7 @@ String explorerPath = '\\\\wsl.localhost';
 
 // Wiki links
 const String wikiDocker =
-    'https://github.com/bostrot/wsl2-distro-manager/wiki/Features#docker-images';
+    'https://github.com/bostrot/wslmanager/wiki/Features#docker-images';
 
 // Runtime cache for distro links loaded from remote source or local images.json.
 Map<String, String> distroRootfsLinks = {};
