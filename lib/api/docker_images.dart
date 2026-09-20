@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:localization/localization.dart';
 import 'package:wsl2distromanager/api/layer_processor.dart';
+import 'package:wsl2distromanager/api/rootfs_architecture.dart';
 import 'package:wsl2distromanager/api/safe_paths.dart';
 import 'package:wsl2distromanager/components/helpers.dart';
 import 'package:wsl2distromanager/components/logging.dart';
@@ -123,6 +124,34 @@ class PlatformManifest {
 
   factory PlatformManifest.fromMap(Map<String, dynamic> map) =>
       PlatformManifest(architecture: map["architecture"], os: map["os"]);
+}
+
+/// What Docker calls the architecture of [family] — the Go spelling, which is
+/// what a manifest list uses. An unknown machine is served the Intel image,
+/// the way the whole catalogue is.
+String dockerArchitectureName(String family) =>
+    family == rootfsArmFamily ? 'arm64' : 'amd64';
+
+/// The manifest a multi-architecture tag offers for [family], or null when it
+/// offers nothing that can run there.
+///
+/// The pick is explicit rather than "the first entry with that architecture":
+/// a tag routinely also carries Windows images, which this app cannot import
+/// into WSL, and 32-bit `arm` is not a substitute for `arm64` — WSL on a
+/// Windows-on-ARM machine is 64-bit only. Before this there was no pick at
+/// all: the amd64 entry was taken on every machine, so a Docker distro on such
+/// a machine imported an image whose binaries it could not run.
+Manifest? manifestForArchitecture(List<Manifest> manifests, String family) {
+  final wanted = dockerArchitectureName(family);
+  for (final entry in manifests) {
+    final platform = entry.platform;
+    if (platform == null || platform.architecture != wanted) continue;
+    // An entry that does not say which OS it is for is taken at its word.
+    if (platform.os.isNotEmpty && platform.os != 'linux') continue;
+    if (entry.digest.isEmpty) continue;
+    return entry;
+  }
+  return null;
 }
 
 typedef ProgressCallback = void Function(int count, int total);
@@ -307,15 +336,21 @@ class DockerImage {
       // Get manifest
       final data = Manifests.fromMap(manifestData);
 
-      // Find amd64 digest
-      var manifest = data.manifests.firstWhere(
-          (element) => element.platform?.architecture == 'amd64',
-          orElse: () => Manifest.empty());
-      var digest = manifest.digest;
+      // Find the digest for this machine's architecture
+      final family = rootfsHostArchitecture();
+      final manifest = manifestForArchitecture(data.manifests, family);
+      if (manifest == null) {
+        logError(
+            StateError('$image has no ${dockerArchitectureName(family)} image'),
+            StackTrace.current,
+            null);
+        return "false";
+      }
+      final digest = manifest.digest;
 
-      // Download amd64 blob
+      // Download the blob for that architecture
       if (kDebugMode) {
-        print('Downloading $image amd64 blob');
+        print('Downloading $image ${dockerArchitectureName(family)} blob');
       }
       try {
         imageManifest =

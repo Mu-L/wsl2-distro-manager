@@ -25,7 +25,8 @@ class _FakeApp extends App {
   _FakeApp(this.links);
   final Map<String, String> links;
   @override
-  Future<Map<String, String>> getDistroLinks() async => links;
+  Future<Map<String, String>> getDistroLinks({String? architecture}) async =>
+      links;
 }
 
 /// A catalog that hands back a local path without touching the network, and

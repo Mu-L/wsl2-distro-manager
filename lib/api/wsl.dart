@@ -13,6 +13,7 @@ import 'package:wsl2distromanager/api/app.dart';
 import 'package:wsl2distromanager/api/cancellation.dart';
 import 'package:wsl2distromanager/api/remote_command.dart';
 import 'package:wsl2distromanager/api/remote_target.dart';
+import 'package:wsl2distromanager/api/rootfs_architecture.dart';
 import 'package:wsl2distromanager/api/safe_paths.dart';
 import 'package:wsl2distromanager/api/execution/broker.dart';
 import 'package:wsl2distromanager/api/execution/models.dart';
@@ -2272,6 +2273,7 @@ try {
     // Get list of distros from git
     distroRootfsLinks = await App().getDistroLinks();
     // Get list of distros from custom repo link and try to format
+    final scraped = <String, String>{};
     try {
       await Dio().get(repo).then((value) => {
             value.data.split('\n').forEach((line) {
@@ -2288,13 +2290,19 @@ try {
                     .replaceAll(RegExp(r'-|_'), ' ')
                     .replaceAllMapped(RegExp(r' .|^.'),
                         (Match m) => m[0].toString().toUpperCase());
-                distroRootfsLinks.addAll({name: repo + filename});
+                scraped.addAll({name: repo + filename});
               }
             })
           });
     } catch (e) {
       onError(e.toString());
     }
+    // A scraped directory listing is not a catalogue: the only thing that says
+    // which architecture a file is built for is its name. Read through the
+    // same filter as `images.json`, so a Windows-on-ARM machine is not offered
+    // the x86-64 appliances it cannot run.
+    distroRootfsLinks
+        .addAll(rootfsLinksFor(scraped, rootfsHostArchitecture()));
     List<String> list = [];
     list.addAll(distroRootfsLinks.keys);
     return list;

@@ -4,6 +4,7 @@ import 'dart:io' show Platform;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:wsl2distromanager/api/rootfs_architecture.dart';
 import 'package:wsl2distromanager/components/constants.dart';
 import 'package:wsl2distromanager/components/helpers.dart';
 
@@ -75,11 +76,24 @@ class App {
   }
 
   /// Get list of distros from Repo
-  Future<Map<String, String>> getDistroLinks() async {
+  ///
+  /// Only the entries that can run on this machine: on a Windows-on-ARM PC a
+  /// catalogue of x86-64 root filesystems is a list of downloads that all end
+  /// in an instance where nothing starts (see [rootfsLinksFor]). A source
+  /// whose entries are all for the other architecture therefore counts as
+  /// unusable, and the next one is tried — the copy the CDN serves is uploaded
+  /// by hand and may still be the Intel-only one while the repo's own already
+  /// lists both.
+  ///
+  /// [architecture] is a seam for tests, which have to be able to describe a
+  /// machine other than the one running them.
+  Future<Map<String, String>> getDistroLinks({String? architecture}) async {
+    final family = architecture ?? rootfsHostArchitecture();
+
     // Debug: the bundled catalogue first, the CDN only as a fallback when
     // the asset is missing or unreadable.
     if (preferBundledCatalogue) {
-      final local = await _getLocalDistroLinks();
+      final local = await _getLocalDistroLinks(family);
       if (local.isNotEmpty) {
         distroRootfsLinks = local;
         return local;
@@ -87,15 +101,13 @@ class App {
     }
 
     try {
-      var response = await dio.get(gitRepoLink);
+      final response = await dio.get(gitRepoLink);
       if (response.statusCode != null && response.statusCode! < 300) {
-        var jsonData = response.data;
-        Map<String, String> distros = {};
-        jsonData.forEach((key, value) {
-          distros.addAll({key: value});
-        });
-        distroRootfsLinks = distros;
-        return distros;
+        final distros = _parseCatalogue(response.data, family);
+        if (distros.isNotEmpty) {
+          distroRootfsLinks = distros;
+          return distros;
+        }
       }
     } catch (e) {
       // ignored
@@ -107,11 +119,8 @@ class App {
     try {
       final response = await dio.get(gitRepoRawLink);
       if (response.statusCode != null && response.statusCode! < 300) {
-        final data = response.data;
-        final parsed = data is String ? json.decode(data) : data;
-        if (parsed is Map && parsed.isNotEmpty) {
-          final distros = parsed
-              .map((key, value) => MapEntry(key.toString(), value.toString()));
+        final distros = _parseCatalogue(response.data, family);
+        if (distros.isNotEmpty) {
           distroRootfsLinks = distros;
           return distros;
         }
@@ -121,7 +130,7 @@ class App {
     }
 
     // Fallback: bundled images.json in app assets.
-    final local = await _getLocalDistroLinks();
+    final local = await _getLocalDistroLinks(family);
     if (local.isNotEmpty) {
       distroRootfsLinks = local;
       return local;
@@ -131,12 +140,20 @@ class App {
     return distroRootfsLinks;
   }
 
-  Future<Map<String, String>> _getLocalDistroLinks() async {
+  /// A catalogue response, decoded when the server sent it as text, reduced to
+  /// the downloads [family] can run. Empty when the body is not a catalogue.
+  Map<String, String> _parseCatalogue(dynamic data, String family) {
+    final parsed = data is String ? json.decode(data) : data;
+    if (parsed is Map) return rootfsLinksFor(parsed, family);
+    return {};
+  }
+
+  Future<Map<String, String>> _getLocalDistroLinks(String family) async {
     try {
       final raw = await rootBundle.loadString('images.json');
       final jsonData = json.decode(raw);
       if (jsonData is Map<String, dynamic>) {
-        return jsonData.map((key, value) => MapEntry(key, value.toString()));
+        return rootfsLinksFor(jsonData, family);
       }
     } catch (e) {
       // ignored
