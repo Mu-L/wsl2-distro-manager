@@ -39,6 +39,8 @@ class _RecordingPlausible implements Plausible {
     String referrer = '',
     String page = '',
     Map<String, String> props = const {},
+    PlausibleRevenue? revenue,
+    bool interactive = true,
   }) async {
     events.add(_Reported(name, page, props));
     return 200;
