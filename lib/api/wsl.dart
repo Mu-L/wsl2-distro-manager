@@ -25,6 +25,7 @@ import 'package:wsl2distromanager/api/wsl_errors.dart';
 import 'package:wsl2distromanager/api/wsl_distribution_conf.dart';
 import 'package:wsl2distromanager/api/wslconfig.dart';
 import 'package:wsl2distromanager/api/windows_terminal_launcher.dart';
+import 'package:wsl2distromanager/api/snippet_env.dart';
 import 'package:wsl2distromanager/components/constants.dart';
 import 'package:wsl2distromanager/api/cloud_init.dart';
 import 'package:wsl2distromanager/components/helpers.dart';
@@ -1370,14 +1371,15 @@ class WSLApi extends VmBackend {
 
   @override
   Future<void> runCommands(String instance, List<String> commands,
-          {String? user}) =>
-      runCmds(instance, commands, user: user);
+          {String? user, Map<String, String> env = const {}}) =>
+      runCmds(instance, commands, user: user, env: env);
 
   /// Executes a command list in a WSL distro and open a terminal
   Future<Process> runCmds(
     String distribution,
     List<String> cmds, {
     String? user,
+    Map<String, String> env = const {},
   }) async {
     // Write commands to /tmp/cmds
     Process fileProcess = await _startWsl(
@@ -1388,6 +1390,13 @@ class WSLApi extends VmBackend {
     );
 
     fileProcess.stdin.writeln('echo "#!/bin/bash" > /tmp/wdmcmds');
+    // The snippet's environment goes in first, and unlike the snippet's own
+    // lines it is escaped for this writer: it carries what the user typed,
+    // and a `$` or a backtick in a password would otherwise be expanded here
+    // — while the script is being written — instead of landing in it.
+    for (final line in SnippetEnv.exportLines(env)) {
+      fileProcess.stdin.writeln('echo "${_echoLiteral(line)}" >> /tmp/wdmcmds');
+    }
     for (var cmd in cmds) {
       cmd = cmd.replaceAll('"', '\\"');
       fileProcess.stdin.writeln('echo "$cmd" >> /tmp/wdmcmds');
@@ -1415,6 +1424,14 @@ class WSLApi extends VmBackend {
 
     return results;
   }
+
+  /// Keeps a line literal through the `echo "…" >> /tmp/wdmcmds` writer,
+  /// which is itself a shell.
+  static String _echoLiteral(String line) => line
+      .replaceAll('\\', '\\\\')
+      .replaceAll('"', '\\"')
+      .replaceAll('\$', '\\\$')
+      .replaceAll('`', '\\`');
 
   /// Executes a shell command in a WSL distro as root and returns its stdout.
   ///

@@ -8,6 +8,7 @@ import 'package:wsl2distromanager/api/apple/guest_greeting.dart';
 import 'package:wsl2distromanager/api/execution/broker.dart';
 import 'package:wsl2distromanager/api/safe_paths.dart';
 import 'package:wsl2distromanager/api/shell.dart';
+import 'package:wsl2distromanager/api/snippet_env.dart';
 import 'package:wsl2distromanager/api/vm/vm_backend.dart';
 import 'package:wsl2distromanager/api/wsl_args.dart';
 import 'package:wsl2distromanager/components/helpers.dart';
@@ -792,12 +793,13 @@ class AppleVmApi extends VmBackend {
 
   @override
   Future<void> runCommands(String instance, List<String> commands,
-      {String? user}) async {
+      {String? user, Map<String, String> env = const {}}) async {
     // Run the snippet in the guest over SSH and show its output in a
     // Terminal window that stays open — the macOS analogue of WSLApi's
     // runCmds. The script travels base64-encoded so nothing in it has to be
-    // escaped through the host shell, ssh's re-parse, or the guest shell.
-    final script = commands.join('\n');
+    // escaped through the host shell, ssh's re-parse, or the guest shell,
+    // and the environment the user typed rides along inside it.
+    final script = [...SnippetEnv.exportLines(env), ...commands].join('\n');
     final payload = base64.encode(utf8.encode(script));
     // One argument after `--`: the guest shell decodes and runs the snippet.
     final remote = 'printf %s $payload | base64 -d | sh';

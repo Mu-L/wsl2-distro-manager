@@ -6,6 +6,7 @@ import 'package:wsl2distromanager/components/analytics.dart';
 import 'package:wsl2distromanager/components/helpers.dart';
 import 'package:wsl2distromanager/dialogs/base_dialog.dart';
 import 'package:wsl2distromanager/dialogs/guest_access_dialog.dart';
+import 'package:wsl2distromanager/dialogs/snippet_env_dialog.dart';
 import 'package:wsl2distromanager/nav/router.dart';
 import 'package:wsl2distromanager/api/quick_actions.dart';
 import 'package:wsl2distromanager/api/vm/vm_backend.dart';
@@ -62,8 +63,14 @@ class QuickPageState extends State<QuickPage> {
                   user: user)) {
                 return;
               }
+              if (!mounted) return;
+              // A snippet that declares or reads environment variables asks
+              // for them here instead of expecting the script to be edited
+              // first (bostrot/ai-tasks#99).
+              final env = await askSnippetEnv(context, action);
+              if (env == null) return;
               api.runCommands(instance, action.content.split('\n'),
-                  user: user);
+                  user: user, env: env);
             },
           ),
       ],

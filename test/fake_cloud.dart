@@ -342,7 +342,7 @@ class FakeDeployBackend extends VmBackend {
 
   @override
   Future<void> runCommands(String instance, List<String> commands,
-          {String? user}) =>
+          {String? user, Map<String, String> env = const {}}) =>
       _unsupported();
 
   @override

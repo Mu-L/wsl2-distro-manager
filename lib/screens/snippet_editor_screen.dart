@@ -91,6 +91,10 @@ class _SnippetEditorPageState extends State<SnippetEditorPage> {
         license: _license.text.trim(),
         git: _git.text.trim(),
         distro: _distros.length == 1 ? _distros.first : _distros.toList(),
+        // Carried over rather than rebuilt: the editor has no field for the
+        // `env:` block, and dropping it would cost an edited community
+        // snippet the descriptions its run dialog is built from.
+        env: widget.existing?.env ?? const [],
         content: _content.text,
       );
 

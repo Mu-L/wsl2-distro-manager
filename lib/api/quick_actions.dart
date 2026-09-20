@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:wsl2distromanager/api/snippet_env.dart';
 import 'package:wsl2distromanager/components/helpers.dart';
 import 'package:yaml/yaml.dart';
 
@@ -13,6 +14,7 @@ class QuickActionItem {
       this.license = '',
       this.git = '',
       this.distro = '',
+      this.env = const [],
       required this.content});
 
   String name;
@@ -22,7 +24,16 @@ class QuickActionItem {
   String license;
   String git;
   dynamic distro; // either a string or a list of strings
+
+  /// The environment the snippet asks for before it runs, from the `env:`
+  /// block of its `info.yml`.
+  List<SnippetEnvVar> env;
   String content;
+
+  /// What to ask the user for before running this snippet: what it declares,
+  /// or — for a snippet that declares nothing, such as a hand-written local
+  /// one — what its script reads from the environment.
+  List<SnippetEnvVar> get envPrompts => SnippetEnv.prompts(env, content);
 
   /// Load from yaml string
   static QuickActionItem fromYamlString(String yamlString,
@@ -60,6 +71,7 @@ class QuickActionItem {
         license: yaml['license'],
         git: yaml['git'],
         distro: yaml['distro'],
+        env: SnippetEnv.parseOrEmpty(yaml['env']),
         content: content);
   }
 
@@ -78,7 +90,8 @@ class QuickActionItem {
         'author: ${jsonEncode(author)}\n'
         'license: ${jsonEncode(license)}\n'
         'git: ${jsonEncode(git)}\n'
-        'distro: $distroYaml\n';
+        'distro: $distroYaml\n'
+        '${env.isEmpty ? '' : 'env: ${SnippetEnv.toYamlValue(env)}\n'}';
   }
 }
 

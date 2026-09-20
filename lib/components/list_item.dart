@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:localization/localization.dart';
 import 'package:wsl2distromanager/api/apple/apple_vm_api.dart';
+import 'package:wsl2distromanager/api/quick_actions.dart';
+import 'package:wsl2distromanager/dialogs/snippet_env_dialog.dart';
 import 'package:wsl2distromanager/api/templates.dart';
 import 'package:wsl2distromanager/api/vm/vm_backend.dart';
 import 'package:wsl2distromanager/api/vm/vm_platform.dart';
@@ -475,9 +477,20 @@ class Bar extends StatelessWidget {
                         user: user)) {
                       return;
                     }
+                    if (!childcontext.mounted) return;
+                    // Its metadata carries the environment the snippet wants;
+                    // a local snippet without any is read from the script
+                    // itself (bostrot/ai-tasks#99).
+                    final action =
+                        QuickAction().byName(quickSettingsTitles[i]) ??
+                            QuickActionItem(
+                                name: quickSettingsTitles[i],
+                                content: quickSettingsContents[i]);
+                    final env = await askSnippetEnv(childcontext, action);
+                    if (env == null) return;
                     api.runCommands(
                         widget.item, quickSettingsContents[i].split('\n'),
-                        user: user);
+                        user: user, env: env);
                   },
                   text: MouseRegion(
                       cursor: SystemMouseCursors.click,

@@ -55,6 +55,11 @@ class MockShell implements Shell {
   final List<String> distros = [];
   List<String> lastStartArguments = [];
 
+  /// Every child [start] handed back, in order, so a test can read what was
+  /// streamed into one — `runCmds` writes the snippet into the distro over
+  /// stdin and nothing else records those bytes.
+  final List<MockProcess> processes = [];
+
   /// Whether the last command — through [run] or [start] — was routed through
   /// cmd.exe. In-distro WSL commands must not be, on either channel: `cmd /c`
   /// eats `&`, `|`, `<`, `>` and `^` before wsl.exe ever sees them. See
@@ -524,11 +529,13 @@ class MockShell implements Shell {
     lastStartArguments = arguments;
 
     final outcome = _simulate(executable, arguments, runInShell);
-    return MockProcess(
+    final process = MockProcess(
       exitCode: outcome.exitCode,
       stdout: outcome.stdout,
       stderr: outcome.stderr,
     );
+    processes.add(process);
+    return process;
   }
 }
 

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:wsl2distromanager/api/quick_actions.dart';
+import 'package:wsl2distromanager/api/snippet_env.dart';
 import 'package:wsl2distromanager/components/helpers.dart';
 
 /// Where a snippet is published to.
@@ -184,7 +185,10 @@ class GithubPublisher {
         'author: ${item.author}\n'
         'license: ${item.license.isEmpty ? 'MIT' : item.license}\n'
         'git: ${item.git.isEmpty ? 'https://github.com/$kScriptsOwner/$kScriptsRepo' : item.git}\n'
-        'distro:$distroYaml\n';
+        'distro:$distroYaml\n'
+        // Kept in the shared copy: the block is what makes the app ask for the
+        // snippet's inputs instead of expecting them to be edited in.
+        '${SnippetEnv.toBlockYaml(item.env)}';
     return {
       'scripts/${item.name}/info.yml': info,
       'scripts/${item.name}/script.noshell': item.content,

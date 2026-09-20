@@ -132,11 +132,20 @@ void main() {
 
   /// Taps [key] and lets the service's file work actually run — it touches
   /// dart:io, which the fake clock in a widget test would otherwise hold.
-  Future<void> tapAndSettle(WidgetTester tester, Key key) async {
+  ///
+  /// [done] turns the wait into a poll. One flat 50 ms was enough only while
+  /// the machine was idle: with the rest of the suite running beside it, the
+  /// file work regularly landed after the assertions and failed the run at
+  /// random.
+  Future<void> tapAndSettle(WidgetTester tester, Key key,
+      {bool Function()? done}) async {
     await tester.runAsync(() async {
       await tester.tap(find.byKey(key));
       await tester.pump();
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      for (var round = 0; round < 60; round++) {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        if (done == null || done()) break;
+      }
     });
     await tester.pumpAndSettle();
   }
@@ -152,7 +161,8 @@ void main() {
         HostsFileService(backend: backend, shell: shell, hostsPath: path);
 
     await pump(tester, service);
-    await tapAndSettle(tester, HostsSettingsSection.syncKey);
+    await tapAndSettle(tester, HostsSettingsSection.syncKey,
+        done: () => shell.executables.isNotEmpty);
 
     expect(shell.executables, hasLength(1));
     expect(find.textContaining('ubuntu.wsl'), findsOneWidget);

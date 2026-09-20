@@ -599,6 +599,25 @@ void main() {
       // The snippet travels base64-encoded, decoded in the guest.
       expect(script, contains('base64 -d | sh'));
     });
+
+    test('the snippet environment rides inside the encoded script', () async {
+      api.runCommands('ubuntu', ['echo hi'],
+          env: {'RUNNER_TOKEN': 'a b\$c'});
+      await Future<void>.delayed(Duration.zero);
+      final openCall = shell.calls.lastWhere((c) => c.first == 'start:open');
+      final script = File(openCall.last).readAsStringSync();
+      final payload =
+          RegExp(r'printf %s ([A-Za-z0-9+/=]+) \| base64 -d \| sh')
+              .firstMatch(script)!
+              .group(1)!;
+      final decoded = utf8.decode(base64.decode(payload));
+      expect(decoded, startsWith('# Values entered for this run.'));
+      expect(decoded, contains('export RUNNER_TOKEN='));
+      expect(decoded, endsWith('echo hi'));
+      // The value itself is encoded again inside, so the guest shell never
+      // sees the `\$`.
+      expect(decoded, contains(base64.encode(utf8.encode('a b\$c'))));
+    });
   });
 
   group('showDisplay', () {

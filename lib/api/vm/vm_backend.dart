@@ -259,8 +259,13 @@ abstract class VmBackend {
   /// Run a snippet — a list of shell lines — inside [instance] as [user]
   /// (root by default), surfacing output in a terminal window. Used by the
   /// Snippets screen and the per-row quick-action menu; fire-and-forget.
+  ///
+  /// [env] is exported in front of the snippet, which is how the values the
+  /// user typed into the snippet's env dialog reach it. Each backend encodes
+  /// them for its own transport, so a value may contain anything — a
+  /// password's `$` or a token's quote included.
   Future<void> runCommands(String instance, List<String> commands,
-      {String? user});
+      {String? user, Map<String, String> env = const {}});
 
   /// Duplicate an instance under a new name.
   Future<String> copy(String distribution, String newName);

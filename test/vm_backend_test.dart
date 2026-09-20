@@ -86,7 +86,7 @@ class FakeBackend extends VmBackend {
 
   @override
   Future<void> runCommands(String instance, List<String> commands,
-      {String? user}) async {}
+      {String? user, Map<String, String> env = const {}}) async {}
 
   @override
   Future<String> copy(String distribution, String newName) async => '';
