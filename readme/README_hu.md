@@ -93,6 +93,7 @@
 
 **Dolgozz úgy, ahogy megszoktad**
 - [x] Nyisd meg a Windows Terminált, a VS Code-ot vagy az Intézőt közvetlenül egy disztribúción belül
+- [x] Minden példány ott a Windows Terminal menüjében, naprakészen, amíg az alkalmazás fut — saját fragmentként kerül oda, így a Terminal beállításaihoz soha nem nyúlunk
 - [x] Kezeld a WSL-t egy *másik* Windows gépen SSH-n keresztül
 - [x] Szinkronizálj egy disztribúciót a hálózatod két gépe között
 - [x] Érd el a példányokat a nevükkel: a hosztnevük a hosts fájlban marad naprakész, így az `ssh ubuntu.wsl` újraindítás után is működik

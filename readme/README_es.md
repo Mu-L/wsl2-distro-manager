@@ -93,6 +93,7 @@
 
 **Trabajar como ya trabajas**
 - [x] Abre Windows Terminal, VS Code o el Explorador directamente dentro de una distro
+- [x] Cada instancia en el menú de Windows Terminal, al día mientras la app está abierta: se añade como un fragmento propio, así que tu configuración de Terminal nunca se modifica
 - [x] Gestiona WSL en *otra* máquina Windows por SSH
 - [x] Sincroniza una distro entre dos máquinas de tu red
 - [x] Alcanza una instancia por su nombre: su nombre de host se mantiene en el archivo hosts, así que `ssh ubuntu.wsl` sigue funcionando tras reiniciar

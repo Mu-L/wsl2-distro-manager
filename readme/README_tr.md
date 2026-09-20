@@ -93,6 +93,7 @@
 
 **Zaten çalıştığınız gibi çalışın**
 - [x] Windows Terminal'i, VS Code'u veya Dosya Gezgini'ni doğrudan bir dağıtımın içinde açın
+- [x] Her örnek Windows Terminal menüsünde, uygulama açıkken güncel tutulur — kendi parçası olarak eklenir, böylece Terminal ayarlarınıza hiç dokunulmaz
 - [x] *Başka* bir Windows makinesindeki WSL'i SSH üzerinden yönetin
 - [x] Ağınızdaki iki makine arasında bir dağıtımı eşitleyin
 - [x] Bir örneğe adıyla erişin: ana makine adı hosts dosyasında güncel tutulur, böylece `ssh ubuntu.wsl` yeniden başlatmadan sonra da çalışır

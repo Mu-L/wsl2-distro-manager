@@ -21,6 +21,7 @@ import 'package:wsl2distromanager/api/mcp/wsl_mcp_service.dart';
 import 'package:wsl2distromanager/api/web/web_dashboard_service.dart';
 import 'package:wsl2distromanager/api/shell.dart';
 import 'package:wsl2distromanager/api/vm/vm_platform.dart';
+import 'package:wsl2distromanager/api/windows_terminal_service.dart';
 import 'package:wsl2distromanager/components/constants.dart';
 import 'package:wsl2distromanager/components/helpers.dart';
 import 'package:wsl2distromanager/components/logging.dart';
@@ -167,6 +168,13 @@ void main() async {
   // changes, so a tick that finds nothing new never raises an elevation
   // prompt (bostrot/wsl2-distro-manager#214).
   HostsFileService.instance.startAutoSync();
+
+  // The same for the Windows Terminal dropdown: a distro created while the
+  // app is open is in the menu the next time Windows Terminal starts. The
+  // fragment file is only rewritten when the rendered JSON changes, so a
+  // tick that finds nothing new costs one `wsl -l -v`
+  // (bostrot/wsl2-distro-manager#239).
+  WindowsTerminalService.instance.startAutoSync();
 
   // Probe AI Workspace in the background so the screen has results by the
   // time it opens. Not awaited; the screen joins this same memoized run.

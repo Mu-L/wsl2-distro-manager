@@ -92,6 +92,7 @@
 
 **Work the way you already do**
 - [x] Open Windows Terminal, VS Code or Explorer straight inside a distro
+- [x] Every instance in the Windows Terminal dropdown, kept current while the app runs — contributed as a fragment of its own, so your Terminal settings are never edited
 - [x] Manage WSL on a *different* Windows machine over SSH
 - [x] Sync a distro between two machines on your network
 - [x] Reach an instance by name: its hostname is kept in your hosts file, so `ssh ubuntu.wsl` keeps working after a reboot

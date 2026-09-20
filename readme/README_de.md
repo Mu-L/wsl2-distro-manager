@@ -94,6 +94,7 @@
 
 **So arbeiten, wie Sie es ohnehin tun**
 - [x] Windows Terminal, VS Code oder den Explorer direkt in einer Distribution öffnen
+- [x] Jede Instanz im Windows-Terminal-Menü, aktuell gehalten, solange die App läuft — als eigenes Fragment beigesteuert, sodass Ihre Terminal-Einstellungen nie verändert werden
 - [x] WSL auf einem *anderen* Windows-Rechner per SSH verwalten
 - [x] Eine Distribution zwischen zwei Rechnern im Netzwerk abgleichen
 - [x] Instanzen über ihren Namen erreichen: der Hostname wird in der hosts-Datei gepflegt, `ssh ubuntu.wsl` funktioniert also auch nach einem Neustart

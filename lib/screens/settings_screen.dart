@@ -39,6 +39,7 @@ import 'package:wsl2distromanager/components/helpers.dart';
 import 'package:wsl2distromanager/components/named_button.dart';
 import 'package:wsl2distromanager/components/notify.dart';
 import 'package:wsl2distromanager/components/unsaved_changes.dart';
+import 'package:wsl2distromanager/components/windows_terminal_settings_section.dart';
 import 'package:wsl2distromanager/components/wsl_size.dart';
 import 'package:wsl2distromanager/dialogs/base_dialog.dart';
 import 'package:wsl2distromanager/dialogs/update_dialog.dart';
@@ -813,6 +814,18 @@ class SettingsPageState extends State<SettingsPage> {
           header: Text('hostsfile-text'.i18n()),
           content: const HostsSettingsSection(),
         ),
+        // Windows only, and not for a remote host either: the menu this
+        // fills is the one on *this* machine, and `wsl -d name` there would
+        // open a distro that lives on the other one
+        // (bostrot/wsl2-distro-manager#239).
+        if (Platform.isWindows) ...[
+        const SizedBox(height: 10),
+        Expander(
+          key: const ValueKey('test-windows-terminal-expander'),
+          header: Text('windowsterminal-text'.i18n()),
+          content: const WindowsTerminalSettingsSection(),
+        ),
+        ],
         if (!isAppleHost || _useRemoteWsl) ...[
         const SizedBox(height: 10),
         Expander(
