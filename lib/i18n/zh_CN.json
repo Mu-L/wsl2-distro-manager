@@ -1204,5 +1204,22 @@
   "experimental-kubernetes-info-text": "浏览 kubeconfig 中的集群。",
   "experimental-cloud-info-text": "将实例部署到云服务商并取回。",
   "experimental-cloudinit-info-text": "编写 cloud-init 配置并用它初始化新实例。",
-  "experimental-playbooks-info-text": "以代码描述实例的状态并应用到现有实例。"
+  "experimental-playbooks-info-text": "以代码描述实例的状态并应用到现有实例。",
+  "wslversions-text": "WSL 版本",
+  "wslversionsinfo-text": "每个已安装发行版运行的 WSL 版本，以及新建发行版所用的版本。",
+  "defaultwslversion-text": "默认 WSL 版本",
+  "defaultwslversioninfo-text": "新建的发行版使用此版本。已有的发行版不会改变。",
+  "defaultwslversionset-text": "新建发行版将使用 WSL %s。",
+  "defaultwslversionfailed-text": "无法设置默认 WSL 版本。%s",
+  "installeddistroversions-text": "已安装的发行版",
+  "wslversionvalue-text": "WSL %s",
+  "wslversionunknown-text": "未报告",
+  "wsldefaultdistro-text": "默认发行版",
+  "converttowsl-text": "转换为 WSL %s",
+  "convertwslversion-text": "将“%s0”转换为 WSL %s1？",
+  "convertwslversionbody-text": "此操作会重写整个磁盘，可能需要几分钟。发行版会先被关闭，转换完成前无法使用。",
+  "convertingwslversion-text": "正在将 %s0 转换为 WSL %s1…",
+  "convertedwslversion-text": "%s0 现在是 WSL %s1。",
+  "convertwslversionfailed-text": "无法转换 %s0。%s1",
+  "wslversionsunavailable-text": "wsl.exe 未报告任何版本。%s"
 }

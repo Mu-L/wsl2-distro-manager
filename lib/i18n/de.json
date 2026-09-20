@@ -1204,5 +1204,22 @@
   "experimental-kubernetes-info-text": "Die Cluster aus deiner kubeconfig durchsuchen.",
   "experimental-cloud-info-text": "Eine Instanz zu einem Cloud-Anbieter bereitstellen und zurückholen.",
   "experimental-cloudinit-info-text": "Cloud-init-Konfigurationen schreiben und neue Instanzen damit einrichten.",
-  "experimental-playbooks-info-text": "Den Zustand einer Instanz als Code beschreiben und auf bestehende Instanzen anwenden."
+  "experimental-playbooks-info-text": "Den Zustand einer Instanz als Code beschreiben und auf bestehende Instanzen anwenden.",
+  "wslversions-text": "WSL-Versionen",
+  "wslversionsinfo-text": "Auf welcher WSL-Version jede installierte Distribution läuft und mit welcher Version neue Distributionen erstellt werden.",
+  "defaultwslversion-text": "Standard-WSL-Version",
+  "defaultwslversioninfo-text": "Neue Distributionen werden mit dieser Version erstellt. Bereits vorhandene Distributionen bleiben unverändert.",
+  "defaultwslversionset-text": "Neue Distributionen werden künftig als WSL %s erstellt.",
+  "defaultwslversionfailed-text": "Die Standard-WSL-Version konnte nicht gesetzt werden. %s",
+  "installeddistroversions-text": "Installierte Distributionen",
+  "wslversionvalue-text": "WSL %s",
+  "wslversionunknown-text": "Nicht gemeldet",
+  "wsldefaultdistro-text": "Standarddistribution",
+  "converttowsl-text": "Zu WSL %s konvertieren",
+  "convertwslversion-text": "'%s0' zu WSL %s1 konvertieren?",
+  "convertwslversionbody-text": "Dabei wird die gesamte Festplatte neu geschrieben, was mehrere Minuten dauern kann. Die Distribution wird zuerst beendet und ist bis zum Abschluss nicht nutzbar.",
+  "convertingwslversion-text": "%s0 wird zu WSL %s1 konvertiert …",
+  "convertedwslversion-text": "%s0 ist jetzt WSL %s1.",
+  "convertwslversionfailed-text": "%s0 konnte nicht konvertiert werden. %s1",
+  "wslversionsunavailable-text": "wsl.exe hat keine Versionen gemeldet. %s"
 }

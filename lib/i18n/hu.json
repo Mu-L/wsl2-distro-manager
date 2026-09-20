@@ -1203,5 +1203,22 @@
   "experimental-kubernetes-info-text": "A kubeconfig fájlod fürtjeinek böngészése.",
   "experimental-cloud-info-text": "Példány telepítése egy felhőszolgáltatóhoz és visszahozása.",
   "experimental-cloudinit-info-text": "Cloud-init konfigurációk írása és új példányok előkészítése velük.",
-  "experimental-playbooks-info-text": "Egy példány állapotának leírása kódként és alkalmazása meglévő példányokra."
+  "experimental-playbooks-info-text": "Egy példány állapotának leírása kódként és alkalmazása meglévő példányokra.",
+  "wslversions-text": "WSL-verziók",
+  "wslversionsinfo-text": "Melyik WSL-verzión fut az egyes telepített disztribúciók, és milyen verzióval jönnek létre az újak.",
+  "defaultwslversion-text": "Alapértelmezett WSL-verzió",
+  "defaultwslversioninfo-text": "Az új disztribúciók ezzel a verzióval jönnek létre. A meglévők nem változnak.",
+  "defaultwslversionset-text": "Az új disztribúciók mostantól WSL %s verzióval jönnek létre.",
+  "defaultwslversionfailed-text": "Az alapértelmezett WSL-verziót nem sikerült beállítani. %s",
+  "installeddistroversions-text": "Telepített disztribúciók",
+  "wslversionvalue-text": "WSL %s",
+  "wslversionunknown-text": "Nincs adat",
+  "wsldefaultdistro-text": "alapértelmezett disztribúció",
+  "converttowsl-text": "Átalakítás WSL %s verzióra",
+  "convertwslversion-text": "Átalakítja a(z) '%s0' disztribúciót WSL %s1 verzióra?",
+  "convertwslversionbody-text": "Ez újraírja a teljes lemezt, és több percig is eltarthat. A disztribúció előbb leáll, és az átalakítás végéig nem használható.",
+  "convertingwslversion-text": "%s0 átalakítása WSL %s1 verzióra…",
+  "convertedwslversion-text": "%s0 mostantól WSL %s1.",
+  "convertwslversionfailed-text": "%s0 átalakítása nem sikerült. %s1",
+  "wslversionsunavailable-text": "A wsl.exe nem jelentett verziókat. %s"
 }

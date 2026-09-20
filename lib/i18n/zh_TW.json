@@ -1204,5 +1204,22 @@
   "experimental-kubernetes-info-text": "瀏覽 kubeconfig 中的叢集。",
   "experimental-cloud-info-text": "將執行個體部署到雲端供應商並取回。",
   "experimental-cloudinit-info-text": "撰寫 cloud-init 設定並用它初始化新的執行個體。",
-  "experimental-playbooks-info-text": "以程式碼描述執行個體的狀態並套用到現有的執行個體。"
+  "experimental-playbooks-info-text": "以程式碼描述執行個體的狀態並套用到現有的執行個體。",
+  "wslversions-text": "WSL 版本",
+  "wslversionsinfo-text": "每個已安裝發行版執行的 WSL 版本，以及新建發行版所使用的版本。",
+  "defaultwslversion-text": "預設 WSL 版本",
+  "defaultwslversioninfo-text": "新建的發行版使用此版本。已存在的發行版不會變更。",
+  "defaultwslversionset-text": "新建發行版將使用 WSL %s。",
+  "defaultwslversionfailed-text": "無法設定預設 WSL 版本。%s",
+  "installeddistroversions-text": "已安裝的發行版",
+  "wslversionvalue-text": "WSL %s",
+  "wslversionunknown-text": "未回報",
+  "wsldefaultdistro-text": "預設發行版",
+  "converttowsl-text": "轉換為 WSL %s",
+  "convertwslversion-text": "將「%s0」轉換為 WSL %s1？",
+  "convertwslversionbody-text": "此操作會重寫整個磁碟，可能需要數分鐘。發行版會先關閉，轉換完成前無法使用。",
+  "convertingwslversion-text": "正在將 %s0 轉換為 WSL %s1…",
+  "convertedwslversion-text": "%s0 現在是 WSL %s1。",
+  "convertwslversionfailed-text": "無法轉換 %s0。%s1",
+  "wslversionsunavailable-text": "wsl.exe 未回報任何版本。%s"
 }

@@ -1203,5 +1203,22 @@
   "experimental-kubernetes-info-text": "Browse the clusters from your kubeconfig.",
   "experimental-cloud-info-text": "Deploy an instance to a cloud provider and pull it back.",
   "experimental-cloudinit-info-text": "Write cloud-init configurations and seed new instances with them.",
-  "experimental-playbooks-info-text": "Describe an instance's state as code and apply it to existing instances."
+  "experimental-playbooks-info-text": "Describe an instance's state as code and apply it to existing instances.",
+  "wslversions-text": "WSL versions",
+  "wslversionsinfo-text": "Which WSL version each installed distro runs on, and which version new distros are created with.",
+  "defaultwslversion-text": "Default WSL version",
+  "defaultwslversioninfo-text": "New distros are created with this version. Distros that already exist are not changed.",
+  "defaultwslversionset-text": "New distros will be created as WSL %s.",
+  "defaultwslversionfailed-text": "Could not set the default WSL version. %s",
+  "installeddistroversions-text": "Installed distros",
+  "wslversionvalue-text": "WSL %s",
+  "wslversionunknown-text": "Not reported",
+  "wsldefaultdistro-text": "default distro",
+  "converttowsl-text": "Convert to WSL %s",
+  "convertwslversion-text": "Convert '%s0' to WSL %s1?",
+  "convertwslversionbody-text": "This rewrites the whole disk and can take several minutes. The distro is shut down first and cannot be used until the conversion finishes.",
+  "convertingwslversion-text": "Converting %s0 to WSL %s1…",
+  "convertedwslversion-text": "%s0 is now WSL %s1.",
+  "convertwslversionfailed-text": "Could not convert %s0. %s1",
+  "wslversionsunavailable-text": "wsl.exe did not report any versions. %s"
 }

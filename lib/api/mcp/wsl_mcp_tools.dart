@@ -46,6 +46,7 @@ import 'package:wsl2distromanager/api/recipes/recipe_service.dart';
 import 'package:wsl2distromanager/api/vm/vm_backend.dart';
 import 'package:wsl2distromanager/api/wsl.dart';
 import 'package:wsl2distromanager/api/wsl_capabilities.dart';
+import 'package:wsl2distromanager/api/wsl_version.dart';
 
 List<McpTool> buildWslMcpTools(
   VmBackend backend,
@@ -953,6 +954,33 @@ List<McpTool> _wslOnlyTools(
         }
         final out = await wslApi.setVersion(distro, version as int);
         return _verbReport(out, '$distro is now WSL $version.');
+      },
+    ),
+    McpTool(
+      name: 'wsl_set_default_version',
+      recording: const ToolRecording(),
+      description:
+          'Set the WSL version new distros are created with '
+          '(wsl --set-default-version). Installed distros are not changed.',
+      inputSchema: const {
+        'type': 'object',
+        'properties': {
+          'version': {
+            'type': 'integer',
+            'enum': [1, 2],
+            'description': 'Default WSL version for new distros.',
+          },
+        },
+        'required': ['version'],
+      },
+      handler: (args) async {
+        final version = args['version'];
+        if (version != 1 && version != 2) {
+          throw ArgumentError('version must be 1 or 2');
+        }
+        final out = await wslApi.setDefaultVersion(version as int);
+        return _verbReport(
+            out, 'New distros will be created as WSL $version.');
       },
     ),
     McpTool(

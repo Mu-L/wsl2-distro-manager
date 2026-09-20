@@ -1203,5 +1203,22 @@
   "experimental-kubernetes-info-text": "Explora los clústeres de tu kubeconfig.",
   "experimental-cloud-info-text": "Despliega una instancia en un proveedor de nube y recupérala.",
   "experimental-cloudinit-info-text": "Escribe configuraciones cloud-init y úsalas para preparar instancias nuevas.",
-  "experimental-playbooks-info-text": "Describe el estado de una instancia como código y aplícalo a instancias existentes."
+  "experimental-playbooks-info-text": "Describe el estado de una instancia como código y aplícalo a instancias existentes.",
+  "wslversions-text": "Versiones de WSL",
+  "wslversionsinfo-text": "Con qué versión de WSL funciona cada distribución instalada y con cuál se crean las nuevas.",
+  "defaultwslversion-text": "Versión de WSL predeterminada",
+  "defaultwslversioninfo-text": "Las distribuciones nuevas se crean con esta versión. Las que ya existen no cambian.",
+  "defaultwslversionset-text": "Las nuevas distribuciones se crearán como WSL %s.",
+  "defaultwslversionfailed-text": "No se pudo establecer la versión de WSL predeterminada. %s",
+  "installeddistroversions-text": "Distribuciones instaladas",
+  "wslversionvalue-text": "WSL %s",
+  "wslversionunknown-text": "Sin información",
+  "wsldefaultdistro-text": "distribución predeterminada",
+  "converttowsl-text": "Convertir a WSL %s",
+  "convertwslversion-text": "¿Convertir '%s0' a WSL %s1?",
+  "convertwslversionbody-text": "Esto reescribe todo el disco y puede tardar varios minutos. La distribución se apaga primero y no se puede usar hasta que termine la conversión.",
+  "convertingwslversion-text": "Convirtiendo %s0 a WSL %s1…",
+  "convertedwslversion-text": "%s0 ahora es WSL %s1.",
+  "convertwslversionfailed-text": "No se pudo convertir %s0. %s1",
+  "wslversionsunavailable-text": "wsl.exe no informó ninguna versión. %s"
 }

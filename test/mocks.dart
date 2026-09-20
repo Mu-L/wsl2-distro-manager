@@ -100,6 +100,26 @@ class MockShell implements Shell {
   /// What `wsl --status` prints.
   String wslStatusOutput = '';
 
+  /// What `wsl --list --verbose` prints. Null falls back to the plain
+  /// `--list` answer, which is the name column on its own — a shape the
+  /// version parser is supposed to ignore rather than mis-read.
+  String? wslListVerboseOutput;
+
+  /// `wsl --list --verbose` fails with this message and no stdout — what a
+  /// host without WSL, or one whose wsl.exe timed out, looks like.
+  String? wslListVerboseFailure;
+
+  /// Every `wsl --set-version` / `wsl --set-default-version` argument list.
+  final List<List<String>> versionCalls = <List<String>>[];
+
+  /// Both version verbs fail with this message instead of succeeding.
+  String? versionFailure;
+
+  /// `wsl --terminate` throws instead of answering — what a host with no
+  /// wsl.exe does, since [WSLApi.stop] spawns the process directly rather
+  /// than through the broker that turns a failure into an exit code.
+  bool throwOnTerminate = false;
+
   /// Every `ssh` invocation fails — the remote host is unreachable.
   bool sshFails = false;
 
@@ -332,7 +352,30 @@ class MockShell implements Shell {
     }
 
     if (arguments.contains('--list')) {
-      stdout = distros.join('\n');
+      if (arguments.contains('--verbose')) {
+        if (wslListVerboseFailure != null) {
+          stderr = wslListVerboseFailure!;
+          exitCode = 1;
+        } else {
+          stdout = wslListVerboseOutput ?? distros.join('\n');
+        }
+      } else {
+        stdout = distros.join('\n');
+      }
+    }
+
+    if (throwOnTerminate && arguments.contains('--terminate')) {
+      throw ProcessException('wsl', arguments, 'No such file or directory', 2);
+    }
+
+    if (arguments.isNotEmpty &&
+        (arguments.first == '--set-version' ||
+            arguments.first == '--set-default-version')) {
+      versionCalls.add(List<String>.from(arguments));
+      if (versionFailure != null) {
+        stderr = versionFailure!;
+        exitCode = 1;
+      }
     }
 
     if (arguments.length == 1 && arguments.first == '--version') {

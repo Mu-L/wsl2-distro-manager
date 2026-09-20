@@ -1203,5 +1203,22 @@
   "experimental-kubernetes-info-text": "kubeconfig dosyanızdaki kümelere göz atın.",
   "experimental-cloud-info-text": "Bir örneği bir bulut sağlayıcısına dağıtın ve geri alın.",
   "experimental-cloudinit-info-text": "cloud-init yapılandırmaları yazın ve yeni örnekleri bunlarla hazırlayın.",
-  "experimental-playbooks-info-text": "Bir örneğin durumunu kod olarak tanımlayın ve mevcut örneklere uygulayın."
+  "experimental-playbooks-info-text": "Bir örneğin durumunu kod olarak tanımlayın ve mevcut örneklere uygulayın.",
+  "wslversions-text": "WSL sürümleri",
+  "wslversionsinfo-text": "Kurulu her dağıtımın hangi WSL sürümünde çalıştığı ve yeni dağıtımların hangi sürümle oluşturulacağı.",
+  "defaultwslversion-text": "Varsayılan WSL sürümü",
+  "defaultwslversioninfo-text": "Yeni dağıtımlar bu sürümle oluşturulur. Hâlihazırda kurulu dağıtımlar değişmez.",
+  "defaultwslversionset-text": "Yeni dağıtımlar artık WSL %s olarak oluşturulacak.",
+  "defaultwslversionfailed-text": "Varsayılan WSL sürümü ayarlanamadı. %s",
+  "installeddistroversions-text": "Kurulu dağıtımlar",
+  "wslversionvalue-text": "WSL %s",
+  "wslversionunknown-text": "Bildirilmedi",
+  "wsldefaultdistro-text": "varsayılan dağıtım",
+  "converttowsl-text": "WSL %s sürümüne dönüştür",
+  "convertwslversion-text": "'%s0' WSL %s1 sürümüne dönüştürülsün mü?",
+  "convertwslversionbody-text": "Bu işlem diskin tamamını yeniden yazar ve birkaç dakika sürebilir. Dağıtım önce kapatılır ve dönüştürme bitene kadar kullanılamaz.",
+  "convertingwslversion-text": "%s0 WSL %s1 sürümüne dönüştürülüyor…",
+  "convertedwslversion-text": "%s0 artık WSL %s1.",
+  "convertwslversionfailed-text": "%s0 dönüştürülemedi. %s1",
+  "wslversionsunavailable-text": "wsl.exe herhangi bir sürüm bildirmedi. %s"
 }

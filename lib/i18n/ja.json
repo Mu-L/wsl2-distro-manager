@@ -1203,5 +1203,22 @@
   "experimental-kubernetes-info-text": "kubeconfig にあるクラスターを閲覧します。",
   "experimental-cloud-info-text": "インスタンスをクラウドプロバイダーにデプロイし、取り戻します。",
   "experimental-cloudinit-info-text": "cloud-init 設定を作成し、新しいインスタンスの初期設定に使います。",
-  "experimental-playbooks-info-text": "インスタンスの状態をコードとして記述し、既存のインスタンスに適用します。"
+  "experimental-playbooks-info-text": "インスタンスの状態をコードとして記述し、既存のインスタンスに適用します。",
+  "wslversions-text": "WSL バージョン",
+  "wslversionsinfo-text": "インストール済みの各ディストリビューションが動作している WSL バージョンと、新規作成時のバージョンです。",
+  "defaultwslversion-text": "既定の WSL バージョン",
+  "defaultwslversioninfo-text": "新しいディストリビューションはこのバージョンで作成されます。既存のものは変更されません。",
+  "defaultwslversionset-text": "新しいディストリビューションは WSL %s で作成されます。",
+  "defaultwslversionfailed-text": "既定の WSL バージョンを設定できませんでした。%s",
+  "installeddistroversions-text": "インストール済みディストリビューション",
+  "wslversionvalue-text": "WSL %s",
+  "wslversionunknown-text": "不明",
+  "wsldefaultdistro-text": "既定のディストリビューション",
+  "converttowsl-text": "WSL %s に変換",
+  "convertwslversion-text": "'%s0' を WSL %s1 に変換しますか?",
+  "convertwslversionbody-text": "ディスク全体を書き換えるため、数分かかることがあります。ディストリビューションは先に終了され、変換が完了するまで使用できません。",
+  "convertingwslversion-text": "%s0 を WSL %s1 に変換しています…",
+  "convertedwslversion-text": "%s0 は WSL %s1 になりました。",
+  "convertwslversionfailed-text": "%s0 を変換できませんでした。%s1",
+  "wslversionsunavailable-text": "wsl.exe からバージョンが報告されませんでした。%s"
 }

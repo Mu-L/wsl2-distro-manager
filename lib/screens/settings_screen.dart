@@ -40,6 +40,7 @@ import 'package:wsl2distromanager/components/unsaved_changes.dart';
 import 'package:wsl2distromanager/components/wsl_size.dart';
 import 'package:wsl2distromanager/dialogs/base_dialog.dart';
 import 'package:wsl2distromanager/dialogs/update_dialog.dart';
+import 'package:wsl2distromanager/dialogs/wsl_version_dialog.dart';
 import 'package:system_info2/system_info2.dart';
 import 'package:wsl2distromanager/nav/router.dart';
 import 'package:wsl2distromanager/theme.dart';
@@ -2434,6 +2435,11 @@ class SettingsPageState extends State<SettingsPage> {
             (capabilities.wslMissing
                 ? 'wslnotfound-text'.i18n()
                 : 'wslinbox-text'.i18n()));
+    // `wsl --status` does not always name one, and a panel that prints "2"
+    // over an answer wsl.exe never gave is claiming a default it cannot see.
+    final defaultVersion = capabilities?.defaultVersion == null
+        ? 'wslversionunknown-text'.i18n()
+        : 'wslversionvalue-text'.i18n(['${capabilities!.defaultVersion}']);
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -2464,6 +2470,30 @@ class SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
               ],
+            ),
+            // Which WSL every distro runs on, and which one a new distro is
+            // created as. `--set-version` existed on the API and was
+            // reachable only from MCP; `--set-default-version` was not wired
+            // up at all (upstream #103).
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Row(
+                children: [
+                  Text('${'defaultwslversion-text'.i18n()}: $defaultVersion'),
+                  const SizedBox(width: 12.0),
+                  Button(
+                    key: const ValueKey('test-wsl-versions-open'),
+                    // The dialog can change the default version, and this
+                    // line is the only other place it is shown — so the
+                    // probe is re-read once the dialog is gone rather than
+                    // left reading what was true when the screen opened.
+                    onPressed: () => wslVersionDialog(context,
+                            showDocker: prefs.getBool('showDocker') ?? false)
+                        .then((_) => _reloadCapabilities()),
+                    child: Text('wslversions-text'.i18n()),
+                  ),
+                ],
+              ),
             ),
             // Split by what the line is about. The panel used to head every
             // line of both probes' stderr with "WSL reported:" inside the
@@ -2496,6 +2526,17 @@ class SettingsPageState extends State<SettingsPage> {
   }
 
   bool _updatingWsl = false;
+
+  /// Re-probe `wsl --version` / `wsl --status` and repaint this panel.
+  ///
+  /// The service caches for the whole process, so the cache has to be dropped
+  /// for a re-read to see anything the WSL-versions dialog changed.
+  Future<void> _reloadCapabilities() async {
+    WSLApi().capabilities.reset();
+    final capabilities = await WSLApi().capabilities.load();
+    if (!mounted) return;
+    setState(() => _capabilities = capabilities);
+  }
 
   Future<void> _runWslUpdate({required bool webDownload}) async {
     setState(() => _updatingWsl = true);
